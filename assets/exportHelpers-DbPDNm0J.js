@@ -1,0 +1,1 @@
+const c=(o,t)=>{const e=document.createElement("a");e.href=o,e.download=t,document.body.appendChild(e),e.click(),document.body.removeChild(e)},n=async(o,t)=>{const e=URL.createObjectURL(o);c(e,t),setTimeout(()=>URL.revokeObjectURL(e),1e4)};export{n as saveFileToDisk,c as triggerDownload};
