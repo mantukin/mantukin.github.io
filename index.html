@@ -17,21 +17,21 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg-0: #061015;
-        --bg-1: #0a1b22;
-        --bg-2: #112933;
-        --panel: rgba(9, 21, 30, 0.92);
-        --panel-strong: rgba(11, 27, 38, 0.97);
+        --bg-0: #090b09;
+        --bg-1: #141814;
+        --bg-2: #222822;
+        --panel: rgba(18, 23, 20, 0.92);
+        --panel-strong: rgba(23, 29, 25, 0.97);
         --border-dark: #06090d;
-        --border-mid: #244a5b;
-        --border-light: rgba(89, 240, 255, 0.32);
-        --accent-primary: #ff9f1c;
-        --accent-secondary: #ffd166;
-        --accent-cool: #59f0ff;
-        --accent-hot: #ff5c8a;
-        --text-main: #f7f1df;
-        --text-soft: #d6e0e7;
-        --text-muted: #8ca5b2;
+        --border-mid: #465148;
+        --border-light: rgba(135, 173, 167, 0.28);
+        --accent-primary: #9a8f63;
+        --accent-secondary: #b8b39e;
+        --accent-cool: #87ada7;
+        --accent-hot: #b07a62;
+        --text-main: #ece7db;
+        --text-soft: #cbc9be;
+        --text-muted: #90988d;
         --shadow-soft: rgba(0, 0, 0, 0.22);
         --pixel-shadow:
           0 0 0 2px var(--border-dark),
@@ -53,8 +53,8 @@
         overflow-x: hidden;
         position: relative;
         background:
-          radial-gradient(circle at top, rgba(255, 159, 28, 0.2), transparent 30%),
-          radial-gradient(circle at 78% 14%, rgba(89, 240, 255, 0.17), transparent 22%),
+          radial-gradient(circle at top, rgba(154, 143, 99, 0.22), transparent 30%),
+          radial-gradient(circle at 78% 14%, rgba(135, 173, 167, 0.16), transparent 22%),
           linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-0) 100%);
         color: var(--text-main);
         font-family: "IBM Plex Mono", monospace;
@@ -115,7 +115,7 @@
       .pixel-frame {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(180deg, rgba(15, 37, 49, 0.97), rgba(8, 21, 29, 0.97));
+        background: linear-gradient(180deg, rgba(24, 31, 27, 0.97), rgba(13, 18, 16, 0.97));
         box-shadow: var(--pixel-shadow);
       }
 
@@ -128,8 +128,8 @@
       }
 
       .pixel-inset {
-        background: linear-gradient(180deg, rgba(7, 16, 24, 0.95), rgba(11, 25, 35, 0.9));
-        border: 2px solid rgba(36, 74, 91, 0.88);
+        background: linear-gradient(180deg, rgba(12, 16, 14, 0.95), rgba(22, 28, 24, 0.9));
+        border: 2px solid rgba(70, 81, 72, 0.88);
         box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.35);
       }
 
@@ -147,8 +147,8 @@
         inset: 0;
         pointer-events: none;
         background:
-          linear-gradient(135deg, rgba(255, 159, 28, 0.11), transparent 38%),
-          linear-gradient(315deg, rgba(89, 240, 255, 0.12), transparent 36%);
+          linear-gradient(135deg, rgba(154, 143, 99, 0.12), transparent 38%),
+          linear-gradient(315deg, rgba(135, 173, 167, 0.12), transparent 36%);
       }
 
       .hero-copy,
@@ -175,16 +175,18 @@
       .hero-logo {
         width: min(100%, 760px);
         filter:
-          drop-shadow(0 0 24px rgba(255, 159, 28, 0.22))
-          drop-shadow(0 0 32px rgba(89, 240, 255, 0.16));
+          drop-shadow(0 0 24px rgba(154, 143, 99, 0.22))
+          drop-shadow(0 0 32px rgba(135, 173, 167, 0.16));
       }
 
       .hero-subtitle {
         margin: 0;
+        padding-left: 2%;
         font-family: "Press Start 2P", monospace;
         font-size: clamp(1rem, 2vw, 1.55rem);
         line-height: 1.75;
         text-transform: uppercase;
+        color: #fff;
       }
 
       .hero-description {
@@ -192,6 +194,7 @@
         max-width: 66ch;
         color: var(--text-soft);
         line-height: 1.8;
+        font-style: italic;
       }
 
       .hero-actions,
@@ -219,29 +222,31 @@
         min-height: 46px;
         padding: 12px 16px;
         font-weight: 700;
-        background: linear-gradient(180deg, rgba(255, 159, 28, 0.94), rgba(214, 99, 31, 0.98));
-        color: #20130a;
+        background: linear-gradient(180deg, rgba(239, 221, 123, 1), rgba(188, 160, 42, 1));
+        color: #14150f;
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(255, 209, 102, 0.4),
+          0 0 0 4px rgba(232, 204, 89, 0.6),
+          0 0 26px rgba(232, 204, 89, 0.28),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
       .arcade-button.secondary {
-        background: linear-gradient(180deg, rgba(89, 240, 255, 0.95), rgba(35, 167, 191, 0.98));
-        color: #072028;
+        background: linear-gradient(180deg, rgba(144, 229, 216, 1), rgba(53, 164, 151, 1));
+        color: #101513;
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(89, 240, 255, 0.34),
+          0 0 0 4px rgba(98, 214, 199, 0.52),
+          0 0 26px rgba(98, 214, 199, 0.24),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
       .arcade-button.ghost {
-        background: linear-gradient(180deg, rgba(25, 50, 63, 0.92), rgba(15, 31, 42, 0.96));
+        background: linear-gradient(180deg, rgba(34, 41, 37, 0.92), rgba(18, 24, 20, 0.96));
         color: var(--text-main);
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(89, 240, 255, 0.16),
+          0 0 0 4px rgba(135, 173, 167, 0.16),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
@@ -259,8 +264,8 @@
 
       .hero-chip {
         padding: 8px 10px;
-        border: 1px solid rgba(255, 209, 102, 0.28);
-        background: rgba(255, 209, 102, 0.08);
+        border: 1px solid rgba(170, 177, 160, 0.24);
+        background: rgba(170, 177, 160, 0.08);
         color: var(--accent-secondary);
         font-size: 0.8rem;
       }
@@ -291,8 +296,8 @@
         gap: 10px;
         padding: 10px 12px;
         color: var(--text-soft);
-        background: rgba(13, 30, 39, 0.85);
-        border: 1px solid rgba(89, 240, 255, 0.12);
+        background: rgba(19, 24, 21, 0.85);
+        border: 1px solid rgba(164, 176, 167, 0.12);
         font-size: 0.84rem;
       }
 
@@ -311,25 +316,25 @@
         width: 12px;
         height: 12px;
         border: 2px solid var(--border-dark);
-        background: var(--accent-primary);
-        box-shadow: 0 0 14px rgba(255, 159, 28, 0.48);
+        background: #f1d96f;
+        box-shadow: 0 0 18px rgba(241, 217, 111, 0.78);
       }
 
       .console-light.cool {
-        background: var(--accent-cool);
-        box-shadow: 0 0 14px rgba(89, 240, 255, 0.48);
+        background: #79ddd0;
+        box-shadow: 0 0 18px rgba(121, 221, 208, 0.76);
       }
 
       .console-light.hot {
-        background: var(--accent-hot);
-        box-shadow: 0 0 14px rgba(255, 92, 138, 0.48);
+        background: #ea9b78;
+        box-shadow: 0 0 18px rgba(234, 155, 120, 0.72);
       }
 
       .status-meter {
         margin-top: auto;
         padding: 14px;
-        background: linear-gradient(180deg, rgba(12, 27, 36, 0.96), rgba(7, 17, 24, 0.98));
-        border: 1px solid rgba(255, 209, 102, 0.14);
+        background: linear-gradient(180deg, rgba(18, 24, 21, 0.96), rgba(11, 15, 13, 0.98));
+        border: 1px solid rgba(170, 177, 160, 0.12);
       }
 
       .status-label {
@@ -371,7 +376,7 @@
 
       .status-panel {
         margin-bottom: 24px;
-        background: linear-gradient(180deg, rgba(14, 33, 43, 0.95), rgba(9, 21, 28, 0.98));
+        background: linear-gradient(180deg, rgba(24, 31, 27, 0.95), rgba(14, 18, 16, 0.98));
       }
 
       .panel-heading,
@@ -437,7 +442,7 @@
 
       .project-group + .project-group {
         padding-top: 20px;
-        border-top: 1px solid rgba(89, 240, 255, 0.12);
+        border-top: 1px solid rgba(164, 176, 167, 0.12);
       }
 
       .group-head {
@@ -457,8 +462,10 @@
       .group-line {
         height: 4px;
         flex: 1 1 auto;
-        background: linear-gradient(90deg, rgba(255, 159, 28, 0.95), rgba(89, 240, 255, 0.95));
-        box-shadow: 0 0 0 1px rgba(6, 9, 13, 0.8);
+        background: linear-gradient(90deg, rgba(232, 204, 89, 1), rgba(98, 214, 199, 1));
+        box-shadow:
+          0 0 0 1px rgba(6, 9, 13, 0.8),
+          0 0 16px rgba(98, 214, 199, 0.24);
       }
 
       .project-grid {
@@ -473,10 +480,10 @@
         gap: 16px;
         min-height: 100%;
         padding: 18px;
-        background: linear-gradient(180deg, rgba(17, 40, 52, 0.97), rgba(9, 21, 29, 0.96));
-        border: 2px solid rgba(36, 74, 91, 0.95);
+        background: linear-gradient(180deg, rgba(28, 35, 31, 0.97), rgba(15, 20, 18, 0.96));
+        border: 2px solid rgba(70, 81, 72, 0.95);
         box-shadow:
-          inset 0 0 0 1px rgba(89, 240, 255, 0.08),
+          inset 0 0 0 1px rgba(164, 176, 167, 0.08),
           6px 6px 0 0 var(--shadow-soft);
         transition:
           transform 140ms steps(2, end),
@@ -486,9 +493,9 @@
 
       .project-card:hover {
         transform: translate(-2px, -2px);
-        border-color: rgba(255, 209, 102, 0.55);
+        border-color: rgba(170, 177, 160, 0.45);
         box-shadow:
-          inset 0 0 0 1px rgba(255, 209, 102, 0.12),
+          inset 0 0 0 1px rgba(170, 177, 160, 0.1),
           8px 8px 0 0 var(--shadow-soft);
       }
 
@@ -506,8 +513,8 @@
         display: grid;
         place-items: center;
         text-decoration: none;
-        background: linear-gradient(180deg, rgba(12, 26, 36, 0.98), rgba(20, 48, 61, 0.92));
-        border: 2px solid rgba(89, 240, 255, 0.2);
+        background: linear-gradient(180deg, rgba(16, 21, 18, 0.98), rgba(29, 37, 33, 0.92));
+        border: 2px solid rgba(164, 176, 167, 0.18);
         box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.28);
       }
 
@@ -515,7 +522,8 @@
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
-        image-rendering: pixelated;
+        image-rendering: auto;
+        image-rendering: smooth;
       }
 
       .project-icon-fallback {
@@ -572,8 +580,8 @@
 
       .tag-pill {
         padding: 6px 10px;
-        border: 1px solid rgba(255, 209, 102, 0.22);
-        background: rgba(255, 209, 102, 0.08);
+        border: 1px solid rgba(170, 177, 160, 0.2);
+        background: rgba(170, 177, 160, 0.08);
         color: var(--accent-secondary);
         font-size: 0.78rem;
       }
@@ -584,18 +592,18 @@
         font-size: 0.78rem;
         font-weight: 700;
         color: var(--text-main);
-        background: linear-gradient(180deg, rgba(20, 46, 59, 0.94), rgba(10, 23, 32, 0.98));
+        background: linear-gradient(180deg, rgba(29, 37, 33, 0.94), rgba(14, 18, 16, 0.98));
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(89, 240, 255, 0.14);
+          0 0 0 4px rgba(164, 176, 167, 0.14);
       }
 
       .inline-button.alt {
-        color: #1d1309;
-        background: linear-gradient(180deg, rgba(255, 209, 102, 0.94), rgba(255, 159, 28, 0.98));
+        color: #181913;
+        background: linear-gradient(180deg, rgba(184, 179, 158, 0.92), rgba(154, 143, 99, 0.96));
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(255, 209, 102, 0.26);
+          0 0 0 4px rgba(184, 179, 158, 0.24);
       }
 
       .secondary-grid {
@@ -613,10 +621,10 @@
 
       .stack-tile,
       .stat-card {
-        background: linear-gradient(180deg, rgba(17, 40, 52, 0.97), rgba(9, 21, 29, 0.96));
-        border: 2px solid rgba(36, 74, 91, 0.95);
+        background: linear-gradient(180deg, rgba(28, 35, 31, 0.97), rgba(15, 20, 18, 0.96));
+        border: 2px solid rgba(70, 81, 72, 0.95);
         box-shadow:
-          inset 0 0 0 1px rgba(89, 240, 255, 0.08),
+          inset 0 0 0 1px rgba(164, 176, 167, 0.08),
           6px 6px 0 0 var(--shadow-soft);
       }
 
@@ -700,17 +708,15 @@
     <main class="page-shell">
       <section class="hero-shell pixel-frame">
         <div class="hero-copy">
-          <p class="eyebrow">Pixel arcade portfolio // online</p>
+          <p class="eyebrow">IPD Workshop // online</p>
           <img
             class="hero-logo"
             src="https://raw.githubusercontent.com/mantukin/mantukin/main/repo_icons/IPD_pixel_logo2.svg"
             alt="IPD Workshop logo"
           />
           <p class="hero-subtitle">Designing useful things, big and small.</p>
-          <p class="hero-description">
-            A custom landing page for Igor Parfenov Design. The hero is handcrafted,
-            while the project gallery, tech stack, and GitHub stats are curated live
-            from the mantukin profile README.
+          <p id="hero-description" class="hero-description">
+            Loading workshop note from README...
           </p>
           <div class="hero-actions">
             <a class="arcade-button" href="https://github.com/mantukin" target="_blank" rel="noreferrer">GitHub Profile</a>
@@ -770,7 +776,7 @@
             <p class="section-kicker">Featured Projects</p>
             <h2 class="section-title">Builds with character</h2>
             <p class="section-copy">
-              A curated arcade wall of desktop tools, Blender addons, browser
+              Desktop tools, Blender addons, browser
               experiments, and practical utilities.
             </p>
           </div>
@@ -814,9 +820,12 @@
       const stackContent = document.getElementById("stack-content");
       const statsContent = document.getElementById("stats-content");
       const statusPanel = document.getElementById("status-panel");
+      const heroDescription = document.getElementById("hero-description");
       const heroStatus = document.getElementById("hero-status");
       const heroStatusDetail = document.getElementById("hero-status-detail");
       const statusMeter = document.getElementById("status-meter");
+      const HERO_TAGLINE_FALLBACK =
+        "Every tool here started as a personal itch - something I needed, couldn't find, and decided to build myself.";
 
       function normalizeHeading(text) {
         return (text || "")
@@ -945,6 +954,124 @@
           wrapper.appendChild(node.cloneNode(true));
         }
         return wrapper;
+      }
+
+      function extractHeroTagline(container) {
+        const candidates = Array.from(container.querySelectorAll("p, em"))
+          .map((node) => cleanDisplayText(node.textContent))
+          .filter(Boolean);
+
+        const exactMatch = candidates.find((text) =>
+          normalizeHeading(text).startsWith("every tool here started as a personal itch")
+        );
+
+        return exactMatch || HERO_TAGLINE_FALLBACK;
+      }
+
+      async function createHighQualityThumbnail(source, maxSize) {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.decoding = "async";
+        image.referrerPolicy = "no-referrer";
+        image.src = source;
+
+        await image.decode();
+
+        const naturalWidth = image.naturalWidth || maxSize;
+        const naturalHeight = image.naturalHeight || maxSize;
+        const scale = Math.min(maxSize / naturalWidth, maxSize / naturalHeight, 1);
+        const targetWidth = Math.max(1, Math.round(naturalWidth * scale));
+        const targetHeight = Math.max(1, Math.round(naturalHeight * scale));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const context = canvas.getContext("2d", { alpha: true });
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+
+        function drawIteratively() {
+          let currentCanvas = document.createElement("canvas");
+          currentCanvas.width = naturalWidth;
+          currentCanvas.height = naturalHeight;
+          let currentContext = currentCanvas.getContext("2d", { alpha: true });
+          currentContext.imageSmoothingEnabled = true;
+          currentContext.imageSmoothingQuality = "high";
+          currentContext.drawImage(image, 0, 0, naturalWidth, naturalHeight);
+
+          while (currentCanvas.width * 0.5 > targetWidth && currentCanvas.height * 0.5 > targetHeight) {
+            const nextCanvas = document.createElement("canvas");
+            nextCanvas.width = Math.max(targetWidth, Math.round(currentCanvas.width * 0.5));
+            nextCanvas.height = Math.max(targetHeight, Math.round(currentCanvas.height * 0.5));
+            const nextContext = nextCanvas.getContext("2d", { alpha: true });
+            nextContext.imageSmoothingEnabled = true;
+            nextContext.imageSmoothingQuality = "high";
+            nextContext.drawImage(
+              currentCanvas,
+              0,
+              0,
+              currentCanvas.width,
+              currentCanvas.height,
+              0,
+              0,
+              nextCanvas.width,
+              nextCanvas.height
+            );
+            currentCanvas = nextCanvas;
+            currentContext = nextContext;
+          }
+
+          context.drawImage(
+            currentCanvas,
+            0,
+            0,
+            currentCanvas.width,
+            currentCanvas.height,
+            0,
+            0,
+            targetWidth,
+            targetHeight
+          );
+        }
+
+        if (typeof createImageBitmap === "function") {
+          try {
+            const bitmap = await createImageBitmap(image, {
+              resizeWidth: targetWidth,
+              resizeHeight: targetHeight,
+              resizeQuality: "high",
+            });
+            context.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+            if (typeof bitmap.close === "function") {
+              bitmap.close();
+            }
+          } catch (error) {
+            drawIteratively();
+          }
+        } else {
+          drawIteratively();
+        }
+
+        return canvas.toDataURL("image/png");
+      }
+
+      function enhanceProjectIcons(container) {
+        const icons = Array.from(container.querySelectorAll("img[data-hires-icon]"));
+
+        for (const icon of icons) {
+          const source = icon.dataset.hiresIcon;
+          if (!source) {
+            continue;
+          }
+
+          createHighQualityThumbnail(source, 44)
+            .then((thumbnail) => {
+              icon.src = thumbnail;
+            })
+            .catch(() => {
+              icon.src = source;
+            });
+        }
       }
 
       function deriveMonogram(title) {
@@ -1148,8 +1275,10 @@
             if (item.icon) {
               const icon = document.createElement("img");
               icon.src = item.icon;
+              icon.dataset.hiresIcon = item.icon;
               icon.alt = "";
               icon.loading = "lazy";
+              icon.decoding = "async";
               iconLink.appendChild(icon);
             } else {
               iconLink.appendChild(createNode("span", "project-icon-fallback", deriveMonogram(item.title)));
@@ -1187,6 +1316,8 @@
           group.append(head, grid);
           projectsContent.appendChild(group);
         }
+
+        enhanceProjectIcons(projectsContent);
       }
 
       function renderTechStack(stackNodes) {
@@ -1284,11 +1415,13 @@
           const featuredProjects = collectSectionNodes(parsed, "featured projects");
           const techStack = collectSectionNodes(parsed, "tech stack");
           const githubStats = collectSectionNodes(parsed, "github stats");
+          const workshopTagline = extractHeroTagline(parsed);
 
           if (!featuredProjects.length || !techStack.length || !githubStats.length) {
             throw new Error("One or more curated README sections could not be found.");
           }
 
+          heroDescription.textContent = workshopTagline;
           renderProjects(featuredProjects);
           renderTechStack(techStack);
           renderStats(githubStats);
@@ -1304,6 +1437,7 @@
         } catch (error) {
           console.error(error);
           contentShell.hidden = true;
+          heroDescription.textContent = HERO_TAGLINE_FALLBACK;
           updateStatus(
             "error",
             "README sync failed",
