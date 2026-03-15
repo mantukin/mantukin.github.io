@@ -1,14 +1,283 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/shakalfx/shakalFX_icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ShakalFX</title>
-    <script type="module" crossorigin src="/shakalfx/assets/index-CY7wjdRI.js"></script>
-    <link rel="stylesheet" crossorigin href="/shakalfx/assets/index-BPmAmKp2.css">
+    <title>mantukin</title>
+    <meta
+      name="description"
+      content="Profile site for mantukin, rendered from the README of the mantukin profile repository."
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --page-bg:
+          radial-gradient(circle at top, rgba(44, 58, 86, 0.38), transparent 38%),
+          linear-gradient(180deg, #0f1117 0%, #0b0d12 100%);
+        --panel-bg: rgba(14, 18, 26, 0.86);
+        --panel-border: rgba(255, 255, 255, 0.08);
+        --text-muted: #94a3b8;
+        --pill-bg: rgba(148, 163, 184, 0.12);
+        --pill-border: rgba(148, 163, 184, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--page-bg);
+        color: #e5e7eb;
+        font-family:
+          "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 24px 0 48px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px 18px;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      }
+
+      .brand-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .brand-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .brand-subtitle {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      .link-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .pill-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--pill-border);
+        background: var(--pill-bg);
+        color: #f8fafc;
+        text-decoration: none;
+        font-size: 0.92rem;
+        font-weight: 600;
+        transition:
+          transform 150ms ease,
+          background-color 150ms ease,
+          border-color 150ms ease;
+      }
+
+      .pill-link:hover {
+        transform: translateY(-1px);
+        background: rgba(148, 163, 184, 0.18);
+        border-color: rgba(148, 163, 184, 0.28);
+      }
+
+      .content-panel {
+        background: rgba(14, 18, 26, 0.9);
+        border: 1px solid var(--panel-border);
+        border-radius: 24px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .markdown-body {
+        max-width: none;
+        margin: 0;
+        padding: 28px;
+        background: transparent;
+        color: #e5e7eb;
+      }
+
+      .markdown-body table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .markdown-body img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .status-card {
+        padding: 28px;
+        color: #e2e8f0;
+      }
+
+      .status-title {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .status-text {
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .status-text a {
+        color: #93c5fd;
+      }
+
+      @media (max-width: 720px) {
+        .page-shell {
+          width: min(100vw - 18px, 1120px);
+          padding-top: 12px;
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .link-row {
+          justify-content: flex-start;
+        }
+
+        .markdown-body {
+          padding: 18px;
+        }
+      }
+    </style>
   </head>
-  <body class="bg-pixel-bg text-pixel-text font-retro antialiased text-xl leading-none">
-    <div id="root"></div>
+  <body>
+    <main class="page-shell">
+      <section class="topbar">
+        <div class="brand-block">
+          <h1 class="brand-title">mantukin.github.io</h1>
+          <p class="brand-subtitle">Profile page rendered from the README of the `mantukin` repository.</p>
+        </div>
+        <div class="link-row">
+          <a class="pill-link" href="https://github.com/mantukin" target="_blank" rel="noreferrer">GitHub Profile</a>
+          <a class="pill-link" href="https://mantukin.github.io/shakalfx/">Open ShakalFX</a>
+        </div>
+      </section>
+
+      <section class="content-panel">
+        <article id="readme" class="markdown-body" hidden></article>
+        <div id="status" class="status-card">
+          <h2 class="status-title">Loading profile README...</h2>
+          <p class="status-text">Fetching the latest content from <a href="https://github.com/mantukin/mantukin" target="_blank" rel="noreferrer">mantukin/mantukin</a>.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      const README_URL = 'https://raw.githubusercontent.com/mantukin/mantukin/main/README.md';
+      const REPO_RAW_ROOT = 'https://raw.githubusercontent.com/mantukin/mantukin/main/';
+      const REPO_BLOB_ROOT = 'https://github.com/mantukin/mantukin/blob/main/';
+
+      const readmeElement = document.getElementById('readme');
+      const statusElement = document.getElementById('status');
+
+      function toRawAssetUrl(relativePath) {
+        return new URL(relativePath.replace(/^\.?\//, ''), REPO_RAW_ROOT).href;
+      }
+
+      function toBlobUrl(relativePath) {
+        return new URL(relativePath.replace(/^\.?\//, ''), REPO_BLOB_ROOT).href;
+      }
+
+      function rewriteRelativeAssets(container) {
+        for (const img of container.querySelectorAll('img')) {
+          const source = img.getAttribute('src');
+          if (source && !/^(https?:|data:)/i.test(source)) {
+            img.setAttribute('src', toRawAssetUrl(source));
+          }
+        }
+
+        for (const source of container.querySelectorAll('source')) {
+          const srcset = source.getAttribute('srcset');
+          if (srcset && !/^(https?:|data:)/i.test(srcset)) {
+            source.setAttribute('srcset', toRawAssetUrl(srcset));
+          }
+        }
+
+        for (const link of container.querySelectorAll('a')) {
+          const href = link.getAttribute('href');
+          if (!href) {
+            continue;
+          }
+
+          if (/^(https?:|mailto:|#)/i.test(href)) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noreferrer');
+            continue;
+          }
+
+          link.setAttribute('href', toBlobUrl(href));
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noreferrer');
+        }
+      }
+
+      async function loadProfileReadme() {
+        try {
+          const response = await fetch(README_URL, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error(`GitHub returned ${response.status}`);
+          }
+
+          const markdown = await response.text();
+          readmeElement.innerHTML = marked.parse(markdown, {
+            gfm: true,
+            breaks: true,
+          });
+          rewriteRelativeAssets(readmeElement);
+          readmeElement.hidden = false;
+          statusElement.hidden = true;
+        } catch (error) {
+          statusElement.innerHTML = `
+            <h2 class="status-title">Could not load the profile README.</h2>
+            <p class="status-text">
+              Open the profile directly at
+              <a href="https://github.com/mantukin" target="_blank" rel="noreferrer">github.com/mantukin</a>.
+            </p>
+          `;
+          console.error(error);
+        }
+      }
+
+      loadProfileReadme();
+    </script>
   </body>
 </html>
