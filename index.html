@@ -8,6 +8,7 @@
       name="description"
       content="Pixel arcade portfolio site for mantukin, curated from Featured Projects, Tech Stack, and GitHub Stats in the mantukin profile README."
     />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,21 +18,21 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg-0: #090b09;
-        --bg-1: #141814;
-        --bg-2: #222822;
-        --panel: rgba(18, 23, 20, 0.92);
-        --panel-strong: rgba(23, 29, 25, 0.97);
+        --bg-0: #061015;
+        --bg-1: #0a1b22;
+        --bg-2: #112933;
+        --panel: rgba(9, 21, 30, 0.92);
+        --panel-strong: rgba(11, 27, 38, 0.97);
         --border-dark: #06090d;
-        --border-mid: #465148;
-        --border-light: rgba(135, 173, 167, 0.28);
-        --accent-primary: #9a8f63;
-        --accent-secondary: #b8b39e;
-        --accent-cool: #87ada7;
-        --accent-hot: #b07a62;
-        --text-main: #ece7db;
-        --text-soft: #cbc9be;
-        --text-muted: #90988d;
+        --border-mid: #244a5b;
+        --border-light: rgba(89, 240, 255, 0.32);
+        --accent-primary: #ff9f1c;
+        --accent-secondary: #ffd166;
+        --accent-cool: #59f0ff;
+        --accent-hot: #ff5c8a;
+        --text-main: #f7f1df;
+        --text-soft: #d6e0e7;
+        --text-muted: #8ca5b2;
         --shadow-soft: rgba(0, 0, 0, 0.22);
         --pixel-shadow:
           0 0 0 2px var(--border-dark),
@@ -53,8 +54,8 @@
         overflow-x: hidden;
         position: relative;
         background:
-          radial-gradient(circle at top, rgba(154, 143, 99, 0.22), transparent 30%),
-          radial-gradient(circle at 78% 14%, rgba(135, 173, 167, 0.16), transparent 22%),
+          radial-gradient(circle at top, rgba(255, 159, 28, 0.2), transparent 30%),
+          radial-gradient(circle at 78% 14%, rgba(89, 240, 255, 0.17), transparent 22%),
           linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-0) 100%);
         color: var(--text-main);
         font-family: "IBM Plex Mono", monospace;
@@ -115,7 +116,7 @@
       .pixel-frame {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(180deg, rgba(24, 31, 27, 0.97), rgba(13, 18, 16, 0.97));
+        background: linear-gradient(180deg, rgba(15, 37, 49, 0.97), rgba(8, 21, 29, 0.97));
         box-shadow: var(--pixel-shadow);
       }
 
@@ -128,8 +129,8 @@
       }
 
       .pixel-inset {
-        background: linear-gradient(180deg, rgba(12, 16, 14, 0.95), rgba(22, 28, 24, 0.9));
-        border: 2px solid rgba(70, 81, 72, 0.88);
+        background: linear-gradient(180deg, rgba(7, 16, 24, 0.95), rgba(11, 25, 35, 0.9));
+        border: 2px solid rgba(36, 74, 91, 0.88);
         box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.35);
       }
 
@@ -147,8 +148,8 @@
         inset: 0;
         pointer-events: none;
         background:
-          linear-gradient(135deg, rgba(154, 143, 99, 0.12), transparent 38%),
-          linear-gradient(315deg, rgba(135, 173, 167, 0.12), transparent 36%);
+          linear-gradient(135deg, rgba(255, 159, 28, 0.11), transparent 38%),
+          linear-gradient(315deg, rgba(89, 240, 255, 0.12), transparent 36%);
       }
 
       .hero-copy,
@@ -175,8 +176,8 @@
       .hero-logo {
         width: min(100%, 760px);
         filter:
-          drop-shadow(0 0 24px rgba(154, 143, 99, 0.22))
-          drop-shadow(0 0 32px rgba(135, 173, 167, 0.16));
+          drop-shadow(0 0 24px rgba(255, 159, 28, 0.22))
+          drop-shadow(0 0 32px rgba(89, 240, 255, 0.16));
       }
 
       .hero-subtitle {
@@ -222,31 +223,29 @@
         min-height: 46px;
         padding: 12px 16px;
         font-weight: 700;
-        background: linear-gradient(180deg, rgba(239, 221, 123, 1), rgba(188, 160, 42, 1));
-        color: #14150f;
+        background: linear-gradient(180deg, rgba(255, 159, 28, 0.94), rgba(214, 99, 31, 0.98));
+        color: #20130a;
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(232, 204, 89, 0.6),
-          0 0 26px rgba(232, 204, 89, 0.28),
+          0 0 0 4px rgba(255, 209, 102, 0.4),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
       .arcade-button.secondary {
-        background: linear-gradient(180deg, rgba(144, 229, 216, 1), rgba(53, 164, 151, 1));
-        color: #101513;
+        background: linear-gradient(180deg, rgba(89, 240, 255, 0.95), rgba(35, 167, 191, 0.98));
+        color: #072028;
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(98, 214, 199, 0.52),
-          0 0 26px rgba(98, 214, 199, 0.24),
+          0 0 0 4px rgba(89, 240, 255, 0.34),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
       .arcade-button.ghost {
-        background: linear-gradient(180deg, rgba(34, 41, 37, 0.92), rgba(18, 24, 20, 0.96));
+        background: linear-gradient(180deg, rgba(25, 50, 63, 0.92), rgba(15, 31, 42, 0.96));
         color: var(--text-main);
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(135, 173, 167, 0.16),
+          0 0 0 4px rgba(89, 240, 255, 0.16),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
@@ -264,8 +263,8 @@
 
       .hero-chip {
         padding: 8px 10px;
-        border: 1px solid rgba(170, 177, 160, 0.24);
-        background: rgba(170, 177, 160, 0.08);
+        border: 1px solid rgba(255, 209, 102, 0.28);
+        background: rgba(255, 209, 102, 0.08);
         color: var(--accent-secondary);
         font-size: 0.8rem;
       }
@@ -296,8 +295,8 @@
         gap: 10px;
         padding: 10px 12px;
         color: var(--text-soft);
-        background: rgba(19, 24, 21, 0.85);
-        border: 1px solid rgba(164, 176, 167, 0.12);
+        background: rgba(13, 30, 39, 0.85);
+        border: 1px solid rgba(89, 240, 255, 0.12);
         font-size: 0.84rem;
       }
 
@@ -316,25 +315,25 @@
         width: 12px;
         height: 12px;
         border: 2px solid var(--border-dark);
-        background: #f1d96f;
-        box-shadow: 0 0 18px rgba(241, 217, 111, 0.78);
+        background: var(--accent-primary);
+        box-shadow: 0 0 14px rgba(255, 159, 28, 0.48);
       }
 
       .console-light.cool {
-        background: #79ddd0;
-        box-shadow: 0 0 18px rgba(121, 221, 208, 0.76);
+        background: var(--accent-cool);
+        box-shadow: 0 0 14px rgba(89, 240, 255, 0.48);
       }
 
       .console-light.hot {
-        background: #ea9b78;
-        box-shadow: 0 0 18px rgba(234, 155, 120, 0.72);
+        background: var(--accent-hot);
+        box-shadow: 0 0 14px rgba(255, 92, 138, 0.48);
       }
 
       .status-meter {
         margin-top: auto;
         padding: 14px;
-        background: linear-gradient(180deg, rgba(18, 24, 21, 0.96), rgba(11, 15, 13, 0.98));
-        border: 1px solid rgba(170, 177, 160, 0.12);
+        background: linear-gradient(180deg, rgba(12, 27, 36, 0.96), rgba(7, 17, 24, 0.98));
+        border: 1px solid rgba(255, 209, 102, 0.14);
       }
 
       .status-label {
@@ -376,7 +375,7 @@
 
       .status-panel {
         margin-bottom: 24px;
-        background: linear-gradient(180deg, rgba(24, 31, 27, 0.95), rgba(14, 18, 16, 0.98));
+        background: linear-gradient(180deg, rgba(14, 33, 43, 0.95), rgba(9, 21, 28, 0.98));
       }
 
       .panel-heading,
@@ -442,7 +441,7 @@
 
       .project-group + .project-group {
         padding-top: 20px;
-        border-top: 1px solid rgba(164, 176, 167, 0.12);
+        border-top: 1px solid rgba(89, 240, 255, 0.12);
       }
 
       .group-head {
@@ -462,10 +461,8 @@
       .group-line {
         height: 4px;
         flex: 1 1 auto;
-        background: linear-gradient(90deg, rgba(232, 204, 89, 1), rgba(98, 214, 199, 1));
-        box-shadow:
-          0 0 0 1px rgba(6, 9, 13, 0.8),
-          0 0 16px rgba(98, 214, 199, 0.24);
+        background: linear-gradient(90deg, rgba(255, 159, 28, 0.95), rgba(89, 240, 255, 0.95));
+        box-shadow: 0 0 0 1px rgba(6, 9, 13, 0.8);
       }
 
       .project-grid {
@@ -480,10 +477,10 @@
         gap: 16px;
         min-height: 100%;
         padding: 18px;
-        background: linear-gradient(180deg, rgba(28, 35, 31, 0.97), rgba(15, 20, 18, 0.96));
-        border: 2px solid rgba(70, 81, 72, 0.95);
+        background: linear-gradient(180deg, rgba(17, 40, 52, 0.97), rgba(9, 21, 29, 0.96));
+        border: 2px solid rgba(36, 74, 91, 0.95);
         box-shadow:
-          inset 0 0 0 1px rgba(164, 176, 167, 0.08),
+          inset 0 0 0 1px rgba(89, 240, 255, 0.08),
           6px 6px 0 0 var(--shadow-soft);
         transition:
           transform 140ms steps(2, end),
@@ -493,9 +490,9 @@
 
       .project-card:hover {
         transform: translate(-2px, -2px);
-        border-color: rgba(170, 177, 160, 0.45);
+        border-color: rgba(255, 209, 102, 0.55);
         box-shadow:
-          inset 0 0 0 1px rgba(170, 177, 160, 0.1),
+          inset 0 0 0 1px rgba(255, 209, 102, 0.12),
           8px 8px 0 0 var(--shadow-soft);
       }
 
@@ -513,8 +510,8 @@
         display: grid;
         place-items: center;
         text-decoration: none;
-        background: linear-gradient(180deg, rgba(16, 21, 18, 0.98), rgba(29, 37, 33, 0.92));
-        border: 2px solid rgba(164, 176, 167, 0.18);
+        background: linear-gradient(180deg, rgba(12, 26, 36, 0.98), rgba(20, 48, 61, 0.92));
+        border: 2px solid rgba(89, 240, 255, 0.2);
         box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.28);
       }
 
@@ -580,8 +577,8 @@
 
       .tag-pill {
         padding: 6px 10px;
-        border: 1px solid rgba(170, 177, 160, 0.2);
-        background: rgba(170, 177, 160, 0.08);
+        border: 1px solid rgba(255, 209, 102, 0.22);
+        background: rgba(255, 209, 102, 0.08);
         color: var(--accent-secondary);
         font-size: 0.78rem;
       }
@@ -592,18 +589,18 @@
         font-size: 0.78rem;
         font-weight: 700;
         color: var(--text-main);
-        background: linear-gradient(180deg, rgba(29, 37, 33, 0.94), rgba(14, 18, 16, 0.98));
+        background: linear-gradient(180deg, rgba(20, 46, 59, 0.94), rgba(10, 23, 32, 0.98));
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(164, 176, 167, 0.14);
+          0 0 0 4px rgba(89, 240, 255, 0.14);
       }
 
       .inline-button.alt {
-        color: #181913;
-        background: linear-gradient(180deg, rgba(184, 179, 158, 0.92), rgba(154, 143, 99, 0.96));
+        color: #1d1309;
+        background: linear-gradient(180deg, rgba(255, 209, 102, 0.94), rgba(255, 159, 28, 0.98));
         box-shadow:
           0 0 0 2px var(--border-dark),
-          0 0 0 4px rgba(184, 179, 158, 0.24);
+          0 0 0 4px rgba(255, 209, 102, 0.26);
       }
 
       .secondary-grid {
@@ -621,10 +618,10 @@
 
       .stack-tile,
       .stat-card {
-        background: linear-gradient(180deg, rgba(28, 35, 31, 0.97), rgba(15, 20, 18, 0.96));
-        border: 2px solid rgba(70, 81, 72, 0.95);
+        background: linear-gradient(180deg, rgba(17, 40, 52, 0.97), rgba(9, 21, 29, 0.96));
+        border: 2px solid rgba(36, 74, 91, 0.95);
         box-shadow:
-          inset 0 0 0 1px rgba(164, 176, 167, 0.08),
+          inset 0 0 0 1px rgba(89, 240, 255, 0.08),
           6px 6px 0 0 var(--shadow-soft);
       }
 
@@ -968,6 +965,10 @@
         return exactMatch || HERO_TAGLINE_FALLBACK;
       }
 
+      function isVectorAsset(source) {
+        return /\.svg(?:[?#].*)?$/i.test(source) || /^data:image\/svg\+xml/i.test(source);
+      }
+
       async function createHighQualityThumbnail(source, maxSize) {
         const image = new Image();
         image.crossOrigin = "anonymous";
@@ -1061,6 +1062,11 @@
         for (const icon of icons) {
           const source = icon.dataset.hiresIcon;
           if (!source) {
+            continue;
+          }
+
+          if (isVectorAsset(source)) {
+            icon.src = source;
             continue;
           }
 
