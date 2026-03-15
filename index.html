@@ -136,6 +136,18 @@
         height: auto;
       }
 
+      .markdown-body .tech-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .markdown-body .tech-badge-row img {
+        margin: 0;
+      }
+
       .status-card {
         padding: 28px;
         color: #e2e8f0;
@@ -250,6 +262,16 @@
         }
       }
 
+      function enhanceReadmeLayout(container) {
+        const headings = Array.from(container.querySelectorAll('h2, h3'));
+        const techStackHeading = headings.find((heading) => /tech stack/i.test(heading.textContent || ''));
+        const techStackContainer = techStackHeading?.nextElementSibling;
+
+        if (techStackContainer && techStackContainer.matches('div[align="center"]')) {
+          techStackContainer.classList.add('tech-badge-row');
+        }
+      }
+
       async function loadProfileReadme() {
         try {
           const response = await fetch(README_URL, { cache: 'no-store' });
@@ -260,9 +282,10 @@
           const markdown = await response.text();
           readmeElement.innerHTML = marked.parse(markdown, {
             gfm: true,
-            breaks: true,
+            breaks: false,
           });
           rewriteRelativeAssets(readmeElement);
+          enhanceReadmeLayout(readmeElement);
           readmeElement.hidden = false;
           statusElement.hidden = true;
         } catch (error) {
