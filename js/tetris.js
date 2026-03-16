@@ -1,13 +1,25 @@
       (function() {
         const canvas = document.getElementById('tetris-canvas');
         if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+        const heroShell = canvas.parentElement;
+        if (!heroShell) return;
+        const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+        if (!ctx) return;
+        const performanceQuery = window.matchMedia(
+          '(max-width: 720px), (pointer: coarse), (prefers-reduced-motion: reduce)'
+        );
 
         let cols = 0;
         let rows = 0;
         let blockSize = 24;
         let yOffset = 0;
         let board = [];
+        let lowPowerMode = false;
+        let frameInterval = 0;
+        let gridOpacity = 0.25;
+        let heroVisible = true;
+        let scrollPauseUntil = 0;
+        const scrollPauseMs = 160;
 
         const CODE_SNIPPETS = [
           "const data = await res.json();",
@@ -32,16 +44,29 @@
           [[1,1,0], [0,1,1], [0,0,0]]  // Z
         ];
 
+        function applyPerformanceProfile() {
+          lowPowerMode = performanceQuery.matches;
+          blockSize = lowPowerMode ? 32 : 24;
+          frameInterval = lowPowerMode ? 1000 / 24 : 0;
+          gridOpacity = lowPowerMode ? 0.14 : 0.25;
+          dropInterval = lowPowerMode ? 120 : 80;
+          canvas.style.opacity = lowPowerMode ? '0.24' : '0.35';
+        }
+
         function resize() {
-          const rect = canvas.parentElement.getBoundingClientRect();
-          canvas.width = rect.width;
-          canvas.height = rect.height;
+          applyPerformanceProfile();
+
+          const rect = heroShell.getBoundingClientRect();
+          canvas.width = Math.max(1, Math.floor(rect.width));
+          canvas.height = Math.max(1, Math.floor(rect.height));
           cols = Math.ceil(canvas.width / blockSize);
           rows = Math.ceil(canvas.height / blockSize);
           yOffset = canvas.height - (rows * blockSize);
 
-          let newBoard = Array.from({length: rows}, () => Array(cols).fill(null));          for(let r=0; r<Math.min(rows, board.length); r++) {
-            for(let c=0; c<Math.min(cols, board[0].length); c++) {
+          const previousCols = board[0]?.length || 0;
+          let newBoard = Array.from({length: rows}, () => Array(cols).fill(null));
+          for (let r = 0; r < Math.min(rows, board.length); r++) {
+            for (let c = 0; c < Math.min(cols, previousCols); c++) {
               newBoard[rows - 1 - r][c] = board[board.length - 1 - r][c];
             }
           }
@@ -49,6 +74,39 @@
         }
 
         window.addEventListener('resize', resize);
+        window.addEventListener('scroll', markScrollActivity, { passive: true });
+        window.addEventListener('touchmove', markScrollActivity, { passive: true });
+        document.addEventListener('visibilitychange', () => {
+          lastTime = 0;
+          lastRenderTime = 0;
+          scrollPauseUntil = 0;
+        });
+
+        if (typeof performanceQuery.addEventListener === 'function') {
+          performanceQuery.addEventListener('change', resize);
+        } else if (typeof performanceQuery.addListener === 'function') {
+          performanceQuery.addListener(resize);
+        }
+
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              heroVisible = entries[0]?.isIntersecting ?? true;
+              if (heroVisible) {
+                lastTime = 0;
+                lastRenderTime = 0;
+                scrollPauseUntil = 0;
+              }
+            },
+            { threshold: 0.08 }
+          );
+          observer.observe(heroShell);
+        }
+
+        function markScrollActivity() {
+          if (!lowPowerMode) return;
+          scrollPauseUntil = performance.now() + scrollPauseMs;
+        }
 
         function rotate(matrix) {
           const N = matrix.length;
@@ -240,7 +298,8 @@
 
         let activePiece = null;
         let lastTime = 0;
-        let dropInterval = 80; 
+        let lastRenderTime = 0;
+        let dropInterval = 80;
         let dropCounter = 0;
 
         function clearLines() {
@@ -273,7 +332,7 @@
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           let gridOffset = (lastTime / 50) % blockSize;
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+          ctx.strokeStyle = `rgba(255, 255, 255, ${gridOpacity})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           for (let c = 0; c <= cols + 1; c++) {
@@ -320,8 +379,28 @@
         }
 
         function update(time = 0) {
+          if (document.hidden || !heroVisible) {
+            lastTime = time;
+            lastRenderTime = time;
+            requestAnimationFrame(update);
+            return;
+          }
+
+          if (lowPowerMode && time < scrollPauseUntil) {
+            lastTime = time;
+            lastRenderTime = time;
+            requestAnimationFrame(update);
+            return;
+          }
+
+          if (frameInterval && lastRenderTime && time - lastRenderTime < frameInterval) {
+            requestAnimationFrame(update);
+            return;
+          }
+
           const deltaTime = time - lastTime;
           lastTime = time;
+          lastRenderTime = time;
 
           if (!activePiece) {
             activePiece = new Piece();
