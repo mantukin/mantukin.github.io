@@ -763,7 +763,13 @@
 
         .hero-subtitle {
           margin: 0;
-          font-size: clamp(0.95rem, 1.85vw, 1.38rem);
+          font-size: clamp(0.90rem, 1.85vw, 1.38rem);
+          line-height: 1.75;
+        }
+
+        .section-title2 {
+          margin: 0;
+          font-size: clamp(0.90rem, 1.85vw, 1.38rem);
           line-height: 1.75;
         }
 
