@@ -297,9 +297,9 @@
       }
 
       .hero-chip {
-        padding: 8px 10px;
-        border: 1px solid rgba(255, 209, 102, 0.28);
-        background: rgba(255, 209, 102, 0.08);
+        padding: 6px 8px;
+        border: 1px solid rgba(255, 209, 102, 0.78);
+        background: rgba(109, 89, 44, 0.68);
         color: var(--accent-secondary);
         font-size: 0.8rem;
       }
@@ -759,6 +759,17 @@
 
         .hero-actions {
           flex-direction: column;
+        }
+
+        .hero-subtitle {
+          margin: 0;
+          font-size: clamp(0.95rem, 1.85vw, 1.38rem);
+          line-height: 1.75;
+        }
+
+        .hero-chip {
+          padding: 6px 8px;
+          font-size: 0.75rem;
         }
 
         .arcade-button,
