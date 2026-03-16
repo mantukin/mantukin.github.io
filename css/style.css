@@ -189,7 +189,9 @@
         filter:
           drop-shadow(0 0 24px rgba(255, 159, 28, 0.22))
           drop-shadow(0 0 32px rgba(89, 240, 255, 0.16));
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition:
+          transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          filter 0.4s ease;
       }
 
       .hero-logo::before {
@@ -198,17 +200,23 @@
         inset: 0;
         background: linear-gradient(90deg, #59f0ff, #ff9f1c, #ec4899, #59f0ff, #ff9f1c);
         background-size: 400% 100%;
+        background-position: 0% 50%;
         opacity: 0;
-        transition: opacity 0.5s ease;
+        pointer-events: none;
+        will-change: opacity, background-position;
+        animation: logo-shimmer 3s linear infinite;
+        transition: opacity 0.45s ease;
       }
 
       .hero-logo:hover {
         transform: scale(1.02) translateY(-2px);
+        filter:
+          drop-shadow(0 0 28px rgba(255, 159, 28, 0.28))
+          drop-shadow(0 0 36px rgba(89, 240, 255, 0.2));
       }
 
       .hero-logo:hover::before {
         opacity: 1;
-        animation: logo-shimmer 3s linear infinite;
       }
 
       @keyframes logo-shimmer {
@@ -800,7 +808,7 @@
         }
       }
 
-      @media (max-width: 720px), (hover: none) and (pointer: coarse) {
+      @media (max-width: 720px) {
         body {
           background-size: 384px 384px, 120vw 120vh, 140vw 140vh, 130vw 130vh, 100% 100%;
           background-attachment: scroll;
@@ -827,25 +835,16 @@
           scroll-behavior: auto;
         }
 
-        body {
-          background-attachment: scroll;
-          animation: none;
-        }
-
         .arcade-button,
         .inline-button,
-        .project-card,
-        .hero-logo,
-        .hero-logo::before,
-        .section-title2::after {
+        .project-card {
           animation: none;
           transition: none;
         }
 
         .arcade-button:hover,
         .inline-button:hover,
-        .project-card:hover,
-        .hero-logo:hover {
+        .project-card:hover {
           transform: none;
         }
       }

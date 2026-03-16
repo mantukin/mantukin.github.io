@@ -2,9 +2,7 @@
         const body = document.body;
         if (!body) return;
 
-        const disablePatternQuery = window.matchMedia(
-          '(max-width: 720px), (pointer: coarse), (prefers-reduced-motion: reduce)'
-        );
+        const disablePatternQuery = window.matchMedia('(max-width: 720px)');
 
         function updatePattern() {
           if (disablePatternQuery.matches) {

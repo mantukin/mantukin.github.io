@@ -6,7 +6,7 @@
         const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
         if (!ctx) return;
         const performanceQuery = window.matchMedia(
-          '(max-width: 720px), (pointer: coarse), (prefers-reduced-motion: reduce)'
+          '(max-width: 720px), (prefers-reduced-motion: reduce)'
         );
 
         let cols = 0;
@@ -16,7 +16,8 @@
         let board = [];
         let lowPowerMode = false;
         let frameInterval = 0;
-        let gridOpacity = 0.25;
+        let gridOpacity = 0.5;
+        let gridOpacityScale = 1;
         let heroVisible = true;
         let scrollPauseUntil = 0;
         const scrollPauseMs = 160;
@@ -34,6 +35,8 @@
           "Object.entries(cfg).map()"
         ];
         const COLORS = ['#10B981', '#06B6D4', '#F59E0B', '#8B5CF6', '#EC4899', '#EAB308', '#3B82F6'];
+        const FALLBACK_CHARS = "{}[]();:<>+-/*=&|!#@%?$0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const LINE_CLEAR_THRESHOLD = 3;
         const SHAPES = [
           [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]], // I
           [[1,0,0], [1,1,1], [0,0,0]], // J
@@ -48,7 +51,7 @@
           lowPowerMode = performanceQuery.matches;
           blockSize = lowPowerMode ? 32 : 24;
           frameInterval = lowPowerMode ? 1000 / 24 : 0;
-          gridOpacity = lowPowerMode ? 0.14 : 0.25;
+          gridOpacityScale = lowPowerMode ? 0.56 : 1;
           dropInterval = lowPowerMode ? 120 : 80;
           canvas.style.opacity = lowPowerMode ? '0.24' : '0.35';
         }
@@ -137,7 +140,9 @@
             const typeId = Math.floor(Math.random() * SHAPES.length);
             this.matrix = SHAPES[typeId];
             this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-            this.text = CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)];
+            const rawText = CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)];
+            // Remove spaces to ensure every block has a visible character
+            this.text = rawText.replace(/\s+/g, '') || FALLBACK_CHARS;
             this.x = Math.floor(cols / 2) - Math.floor(this.matrix.length / 2);
             this.y = 0;
             this.targetX = this.x;
@@ -174,8 +179,8 @@
               currentMatrix = rotate(currentMatrix);
             }
 
-            // Simulate a "miss-drop" human error 5% of the time so the AI isn't perfect
-            if (Math.random() < 0.05) {
+            // Simulate a "miss-drop" human error 3% of the time so the AI isn't perfect
+            if (Math.random() < 0.03) {
               bestX = Math.max(0, Math.min(cols - 1, bestX + (Math.random() > 0.5 ? 1 : -1)));
             }
 
@@ -216,16 +221,31 @@
               }
             }
 
+            let completedRows = [];
             for (let r = 0; r < rows; r++) {
-              if (tempBoard[r].every(cell => cell)) completeLines++;
+              if (tempBoard[r].every(cell => cell)) completedRows.push(r);
             }
 
-            for (let c = 0; c < cols - 1; c++) {
-              bumpiness += Math.abs(heights[c] - heights[c+1]);
+            // Find max consecutive lines
+            let maxConsecutive = 0;
+            let currentConsecutive = 0;
+            if (completedRows.length > 0) {
+              currentConsecutive = 1;
+              maxConsecutive = 1;
+              for (let i = 1; i < completedRows.length; i++) {
+                if (completedRows[i] === completedRows[i - 1] + 1) {
+                  currentConsecutive++;
+                } else {
+                  currentConsecutive = 1;
+                }
+                if (currentConsecutive > maxConsecutive) maxConsecutive = currentConsecutive;
+              }
             }
 
+            const clearsThisMove = maxConsecutive >= LINE_CLEAR_THRESHOLD ? maxConsecutive : 0;
+            const preparedLines = completedRows.length > 0 && maxConsecutive < LINE_CLEAR_THRESHOLD ? maxConsecutive : 0;
             let maxHeight = Math.max(...heights);
-            return (completeLines * 10) - (holes * 5) - (bumpiness * 1) - (maxHeight * 0.1) + (y * 0.5);
+            return (clearsThisMove * 18) + (preparedLines * 3) - (holes * 5) - (bumpiness * 1) - (maxHeight * 0.1) + (y * 0.5);
           }
 
           moveDown() {
@@ -286,7 +306,8 @@
                   let ny = this.y + r;
                   let nx = this.x + c;
                   if (ny >= 0 && ny < rows && nx >= 0 && nx < cols) {
-                    let char = this.text[lockedTextIndex % this.text.length];
+                    let char = this.text[lockedTextIndex % this.text.length] || 
+                               FALLBACK_CHARS[Math.floor(Math.random() * FALLBACK_CHARS.length)];
                     board[ny][nx] = { color: this.color, char: char };
                     lockedTextIndex++;
                   }
@@ -303,13 +324,44 @@
         let dropCounter = 0;
 
         function clearLines() {
+          const completedRows = [];
           for (let r = rows - 1; r >= 0; r--) {
             if (board[r].every(cell => cell)) {
-              board.splice(r, 1);
-              board.unshift(Array(cols).fill(null));
-              r++; 
+              completedRows.push(r);
             }
           }
+
+          if (completedRows.length === 0) return 0;
+
+          // Group consecutive rows (completedRows is sorted bottom to top, so indices are decreasing)
+          const groups = [];
+          let currentGroup = [completedRows[0]];
+          for (let i = 1; i < completedRows.length; i++) {
+            if (completedRows[i] === completedRows[i - 1] - 1) {
+              currentGroup.push(completedRows[i]);
+            } else {
+              groups.push(currentGroup);
+              currentGroup = [completedRows[i]];
+            }
+          }
+          groups.push(currentGroup);
+
+          // Identify rows that belong to a group of at least 3
+          const rowsToClear = groups
+            .filter(group => group.length >= LINE_CLEAR_THRESHOLD)
+            .flat();
+
+          if (rowsToClear.length === 0) return 0;
+
+          // Sort rows to clear from bottom to top to keep splicing consistent
+          rowsToClear.sort((a, b) => b - a);
+
+          for (const rowIndex of rowsToClear) {
+            board.splice(rowIndex, 1);
+            board.unshift(Array(cols).fill(null));
+          }
+
+          return rowsToClear.length;
         }
 
         function drawBlock(nx, ny, color, char) {
@@ -332,7 +384,8 @@
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           let gridOffset = (lastTime / 50) % blockSize;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${gridOpacity})`;
+          ctx.globalAlpha = Math.max(0, Math.min(1, gridOpacity * gridOpacityScale));
+          ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1;
           ctx.beginPath();
           for (let c = 0; c <= cols + 1; c++) {
@@ -346,6 +399,7 @@
             ctx.lineTo(canvas.width, py);
           }
           ctx.stroke();
+          ctx.globalAlpha = 1.0;
 
           ctx.font = 'bold 16px monospace';
           ctx.textAlign = 'center';
@@ -368,7 +422,8 @@
                   let nx = activePiece.x + c;
                   let ny = activePiece.y + r;
                   if (ny >= 0) {
-                    let char = activePiece.text[textIndex % activePiece.text.length];
+                    let char = activePiece.text[textIndex % activePiece.text.length] || 
+                               FALLBACK_CHARS[Math.floor(Math.random() * FALLBACK_CHARS.length)];
                     drawBlock(nx, ny, activePiece.color, char);
                     textIndex++;
                   }
