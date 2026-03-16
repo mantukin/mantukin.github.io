@@ -19,8 +19,10 @@
         let gridOpacity = 0.5;
         let gridOpacityScale = 1;
         let heroVisible = true;
+        let needsRedraw = false;
         let scrollPauseUntil = 0;
         const scrollPauseMs = 160;
+        const pausedFrameInterval = 1000 / 8;
 
         const CODE_SNIPPETS = [
           "const data = await res.json();",
@@ -74,6 +76,7 @@
             }
           }
           board = newBoard;
+          needsRedraw = true;
         }
 
         window.addEventListener('resize', resize);
@@ -431,6 +434,7 @@
               }
             }
           }
+          needsRedraw = false;
         }
 
         function update(time = 0) {
@@ -442,8 +446,11 @@
           }
 
           if (lowPowerMode && time < scrollPauseUntil) {
+            if (needsRedraw || !lastRenderTime || time - lastRenderTime >= pausedFrameInterval) {
+              draw();
+              lastRenderTime = time;
+            }
             lastTime = time;
-            lastRenderTime = time;
             requestAnimationFrame(update);
             return;
           }
