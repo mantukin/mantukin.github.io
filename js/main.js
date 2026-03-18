@@ -773,6 +773,9 @@
 
         for (const entry of entries) {
           const frame = createNode("div", "stat-card");
+          if (/streak/i.test(entry.outerHTML)) {
+            frame.classList.add("stat-card-wide");
+          }
           const media = entry.cloneNode(true);
           for (const image of media.querySelectorAll("img")) {
             image.loading = "lazy";
@@ -854,8 +857,8 @@
           heroDescription.textContent = HERO_TAGLINE_FALLBACK;
           updateStatus(
             "error",
-            "README sync failed",
-            "The arcade cabinet could not load curated sections from mantukin/mantukin.",
+            "Sync failed",
+            "The arcade cabinet could not load the profile sections right now.",
             true
           );
         }
