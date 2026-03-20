@@ -1,6 +1,10 @@
       const README_URL = "https://raw.githubusercontent.com/mantukin/mantukin/main/README.md";
       const REPO_RAW_ROOT = "https://raw.githubusercontent.com/mantukin/mantukin/main/";
       const REPO_BLOB_ROOT = "https://github.com/mantukin/mantukin/blob/main/";
+      const GITHUB_USER = "mantukin";
+      const GITHUB_PROFILE_URL = "https://github.com/" + GITHUB_USER;
+      const GITHUB_USER_API_URL = "https://api.github.com/users/" + GITHUB_USER;
+      const GITHUB_AVATAR_FALLBACK_URL = GITHUB_PROFILE_URL + ".png?size=160";
 
       const contentShell = document.getElementById("content-shell");
       const projectsContent = document.getElementById("projects-content");
@@ -11,8 +15,74 @@
       const heroStatus = document.getElementById("hero-status");
       const heroStatusDetail = document.getElementById("hero-status-detail");
       const statusMeter = document.getElementById("status-meter");
+      const heroAvatar = document.getElementById("hero-avatar");
+      const heroAvatarFallback = document.getElementById("hero-avatar-fallback");
+      const heroProfileLink = document.getElementById("hero-profile-link");
       const HERO_TAGLINE_FALLBACK =
         "Every tool here started as a personal itch - something I needed, couldn't find, and decided to build myself.";
+
+      function withAvatarSize(source, size = 160) {
+        try {
+          const url = new URL(source, window.location.href);
+          url.searchParams.set("size", String(size));
+          return url.href;
+        } catch {
+          return GITHUB_AVATAR_FALLBACK_URL;
+        }
+      }
+
+      function applyProfileAvatar(source) {
+        if (!heroAvatar || !heroAvatarFallback) {
+          return;
+        }
+
+        heroAvatar.hidden = true;
+        heroAvatarFallback.hidden = false;
+        heroAvatar.dataset.retryState = "primary";
+
+        heroAvatar.onload = () => {
+          heroAvatar.hidden = false;
+          heroAvatarFallback.hidden = true;
+        };
+
+        heroAvatar.onerror = () => {
+          if (heroAvatar.dataset.retryState === "fallback") {
+            heroAvatar.hidden = true;
+            heroAvatarFallback.hidden = false;
+            return;
+          }
+
+          heroAvatar.dataset.retryState = "fallback";
+          heroAvatar.src = GITHUB_AVATAR_FALLBACK_URL;
+        };
+
+        heroAvatar.src = withAvatarSize(source);
+      }
+
+      async function loadProfileAvatar() {
+        if (heroProfileLink) {
+          heroProfileLink.href = GITHUB_PROFILE_URL;
+        }
+
+        try {
+          const response = await fetch(GITHUB_USER_API_URL, {
+            headers: {
+              Accept: "application/vnd.github+json",
+            },
+            cache: "no-store",
+          });
+
+          if (!response.ok) {
+            throw new Error("GitHub avatar request failed with status " + response.status);
+          }
+
+          const profile = await response.json();
+          applyProfileAvatar(profile.avatar_url || GITHUB_AVATAR_FALLBACK_URL);
+        } catch (error) {
+          console.warn("Avatar load failed, falling back to direct GitHub avatar URL.", error);
+          applyProfileAvatar(GITHUB_AVATAR_FALLBACK_URL);
+        }
+      }
 
       function normalizeHeading(text) {
         return (text || "")
@@ -864,5 +934,6 @@
         }
       }
 
+      loadProfileAvatar();
       loadProfileReadme();
     
