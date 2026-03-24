@@ -18,6 +18,37 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      html {
+        background: #061015;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background-color: #061015;
+        color: #f7f1df;
+        --bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='16' height='16' fill='%23222'/%3E%3Crect x='48' y='16' width='32' height='16' fill='%23444'/%3E%3Crect x='96' y='16' width='16' height='32' fill='%23222'/%3E%3Crect x='16' y='48' width='16' height='32' fill='%23333'/%3E%3Crect x='64' y='64' width='32' height='16' fill='%23444'/%3E%3Crect x='96' y='96' width='32' height='16' fill='%23222'/%3E%3Crect x='32' y='96' width='16' height='16' fill='%23333'/%3E%3C/svg%3E");
+        background-image:
+          var(--bg-pattern),
+          radial-gradient(circle at 50% 50%, rgba(255, 159, 28, 0.25) 0%, transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(89, 240, 255, 0.25) 0%, transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.2) 0%, transparent 40%),
+          linear-gradient(180deg, #112933 0%, #0a1b22 45%, #061015 100%);
+        background-size: 512px 512px, 150vw 150vh, 180vw 180vh, 160vw 160vh, 100% 100%;
+        background-attachment: fixed;
+        background-blend-mode: color-dodge, normal, normal, normal, normal;
+      }
+
+      body[data-booting="true"] main {
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
     <script>
       (function () {
         const owner = "mantukin";
@@ -26,6 +57,29 @@
         const url = new URL(window.location.href);
         const currentVersion = url.searchParams.get(versionParam);
         const bootstrapVersion = currentVersion || String(Date.now());
+        let bootResolved = false;
+        let cssReady = false;
+        let versionCheckDone = false;
+
+        function finishBoot(force = false) {
+          if (bootResolved || (!force && (!cssReady || !versionCheckDone))) {
+            return;
+          }
+
+          bootResolved = true;
+
+          const reveal = () => {
+            const body = document.body;
+            if (!body) {
+              document.addEventListener("DOMContentLoaded", reveal, { once: true });
+              return;
+            }
+
+            body.removeAttribute("data-booting");
+          };
+
+          reveal();
+        }
 
         window.__ASSET_VERSION__ = bootstrapVersion;
         window.__versionedAsset = function (path) {
@@ -36,7 +90,16 @@
         const stylesheet = document.createElement("link");
         stylesheet.rel = "stylesheet";
         stylesheet.href = window.__versionedAsset("css/style.css");
+        stylesheet.addEventListener("load", () => {
+          cssReady = true;
+          finishBoot();
+        }, { once: true });
+        stylesheet.addEventListener("error", () => {
+          cssReady = true;
+          finishBoot();
+        }, { once: true });
         document.head.appendChild(stylesheet);
+        window.setTimeout(() => finishBoot(true), 3200);
 
         fetch("https://api.github.com/repos/" + owner + "/" + repo + "/commits?per_page=1", {
           cache: "no-store",
@@ -57,6 +120,8 @@
                 : "";
 
             if (!latestVersion || currentVersion === latestVersion) {
+              versionCheckDone = true;
+              finishBoot();
               return;
             }
 
@@ -65,11 +130,13 @@
           })
           .catch(() => {
             // Keep the bootstrap version when GitHub API is unavailable.
+            versionCheckDone = true;
+            finishBoot();
           });
       })();
     </script>
   </head>
-  <body>
+  <body data-booting="true">
     <main class="page-shell">
       <section class="hero-shell pixel-frame">
         <canvas id="tetris-canvas"></canvas>
