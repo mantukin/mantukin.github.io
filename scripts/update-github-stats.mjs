@@ -33,6 +33,52 @@ async function githubGraphQL(query, variables = {}) {
   return payload.data;
 }
 
+async function fetchPublicContributionYear(login, year) {
+  const url = new URL(`https://github.com/users/${login}/contributions`);
+  url.searchParams.set("from", `${year}-01-01`);
+  url.searchParams.set("to", `${year}-12-31`);
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "mantukin.github.io-stats-generator",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub contributions page request failed with ${response.status}`);
+  }
+
+  const html = await response.text();
+  const days = [];
+  const dayPattern =
+    /data-date="([^"]+)" id="([^"]+)"[^>]*><\/td>\s*<tool-tip[^>]* for="\2"[^>]*>([^<]+)<\/tool-tip>/g;
+
+  for (const match of html.matchAll(dayPattern)) {
+    const [, date, , tooltip] = match;
+    const trimmedTooltip = tooltip.trim();
+    const countMatch = trimmedTooltip.match(/^([\d,]+)\s+contributions?/i);
+    const contributionCount = /^No contributions?/i.test(trimmedTooltip)
+      ? 0
+      : countMatch
+        ? Number(countMatch[1].replace(/,/g, ""))
+        : 0;
+
+    days.push({
+      date,
+      contributionCount,
+    });
+  }
+
+  if (!days.length) {
+    throw new Error(`Could not parse public contribution graph for ${year}.`);
+  }
+
+  return {
+    totalContributions: days.reduce((sum, day) => sum + day.contributionCount, 0),
+    contributionDays: days,
+  };
+}
+
 async function fetchUserOverview(login) {
   const data = await githubGraphQL(
     `
@@ -109,7 +155,7 @@ async function fetchOwnedRepositories(login) {
   return repositories;
 }
 
-async function fetchContributionYear(login, year) {
+async function fetchCommitContributionYear(login, year) {
   const from = `${year}-01-01T00:00:00Z`;
   const to = `${year}-12-31T23:59:59Z`;
   const data = await githubGraphQL(
@@ -118,15 +164,6 @@ async function fetchContributionYear(login, year) {
         user(login: $login) {
           contributionsCollection(from: $from, to: $to) {
             totalCommitContributions
-            contributionCalendar {
-              totalContributions
-              weeks {
-                contributionDays {
-                  contributionCount
-                  date
-                }
-              }
-            }
           }
         }
       }
@@ -261,17 +298,19 @@ async function generateSnapshot() {
   let yearCommits = 0;
 
   for (const year of contributionYears) {
-    const contributionYear = await fetchContributionYear(USERNAME, year);
+    const [commitContributionYear, publicContributionYear] = await Promise.all([
+      fetchCommitContributionYear(USERNAME, year),
+      fetchPublicContributionYear(USERNAME, year),
+    ]);
+
     if (year === contributionYears[0]) {
-      yearCommits = contributionYear.totalCommitContributions || 0;
+      yearCommits = commitContributionYear.totalCommitContributions || 0;
     }
 
-    totalContributions += contributionYear.contributionCalendar?.totalContributions || 0;
+    totalContributions += publicContributionYear.totalContributions || 0;
 
-    for (const week of contributionYear.contributionCalendar?.weeks || []) {
-      for (const day of week.contributionDays || []) {
-        contributionDays.set(day.date, day.contributionCount);
-      }
+    for (const day of publicContributionYear.contributionDays || []) {
+      contributionDays.set(day.date, day.contributionCount);
     }
   }
 
@@ -302,7 +341,7 @@ async function main() {
   const snapshot = await generateSnapshot();
   const payload = {
     generatedAt: new Date().toISOString(),
-    source: "github-graphql",
+    source: "github-public-graph+graphql",
     data: snapshot,
   };
 
