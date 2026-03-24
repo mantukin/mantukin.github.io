@@ -3,8 +3,14 @@
         if (!body) return;
 
         const disablePatternQuery = window.matchMedia('(max-width: 720px)');
+        let patternStarted = false;
+        let patternPending = false;
+        let startupTriggered = false;
 
         function updatePattern() {
+          patternPending = false;
+          patternStarted = true;
+
           if (disablePatternQuery.matches) {
             body.style.removeProperty('--bg-pattern');
             return;
@@ -39,12 +45,47 @@
           body.style.setProperty('--bg-pattern', `url(${canvas.toDataURL()})`);
         }
 
-        if (typeof disablePatternQuery.addEventListener === 'function') {
-          disablePatternQuery.addEventListener('change', updatePattern);
-        } else if (typeof disablePatternQuery.addListener === 'function') {
-          disablePatternQuery.addListener(updatePattern);
+        function scheduleInitialPattern() {
+          if (startupTriggered || patternStarted || patternPending) {
+            return;
+          }
+
+          startupTriggered = true;
+          patternPending = true;
+
+          if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(updatePattern, { timeout: 400 });
+            return;
+          }
+
+          window.setTimeout(updatePattern, 120);
         }
 
-        updatePattern();
+        function refreshPattern() {
+          if (patternPending) {
+            return;
+          }
+
+          if (patternStarted) {
+            updatePattern();
+            return;
+          }
+
+          scheduleInitialPattern();
+        }
+
+        if (typeof disablePatternQuery.addEventListener === 'function') {
+          disablePatternQuery.addEventListener('change', refreshPattern);
+        } else if (typeof disablePatternQuery.addListener === 'function') {
+          disablePatternQuery.addListener(refreshPattern);
+        }
+
+        if (body.dataset.profileReady === 'true') {
+          scheduleInitialPattern();
+          return;
+        }
+
+        window.addEventListener('profile-content-ready', scheduleInitialPattern, { once: true });
+        window.setTimeout(scheduleInitialPattern, 2800);
       })();
     

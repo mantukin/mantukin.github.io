@@ -23,8 +23,22 @@
         color-scheme: dark;
       }
 
+      @keyframes loader-pulse {
+        0%, 100% {
+          opacity: 0.35;
+          transform: scaleY(0.55);
+        }
+
+        50% {
+          opacity: 1;
+          transform: scaleY(1);
+        }
+      }
+
       html {
         background: #061015;
+        overflow-y: scroll;
+        scrollbar-gutter: stable;
       }
 
       body {
@@ -32,21 +46,145 @@
         min-height: 100vh;
         background-color: #061015;
         color: #f7f1df;
-        --bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128' shape-rendering='crispEdges'%3E%3Crect x='0' y='0' width='16' height='16' fill='%23222'/%3E%3Crect x='48' y='16' width='32' height='16' fill='%23444'/%3E%3Crect x='96' y='16' width='16' height='32' fill='%23222'/%3E%3Crect x='16' y='48' width='16' height='32' fill='%23333'/%3E%3Crect x='64' y='64' width='32' height='16' fill='%23444'/%3E%3Crect x='96' y='96' width='32' height='16' fill='%23222'/%3E%3Crect x='32' y='96' width='16' height='16' fill='%23333'/%3E%3C/svg%3E");
         background-image:
-          var(--bg-pattern),
           radial-gradient(circle at 50% 50%, rgba(255, 159, 28, 0.25) 0%, transparent 40%),
           radial-gradient(circle at 50% 50%, rgba(89, 240, 255, 0.25) 0%, transparent 40%),
           radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.2) 0%, transparent 40%),
           linear-gradient(180deg, #112933 0%, #0a1b22 45%, #061015 100%);
-        background-size: 512px 512px, 150vw 150vh, 180vw 180vh, 160vw 160vh, 100% 100%;
+        background-size: 150vw 150vh, 180vw 180vh, 160vw 160vh, 100% 100%;
         background-attachment: fixed;
-        background-blend-mode: color-dodge, normal, normal, normal, normal;
+      }
+
+      main {
+        transition: opacity 0.42s ease;
       }
 
       body[data-booting="true"] main {
         opacity: 0;
         visibility: hidden;
+      }
+
+      body:not([data-booting="true"])[data-app-ready="false"] main {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(255, 159, 28, 0.16) 0%, transparent 34%),
+          radial-gradient(circle at 50% 50%, rgba(89, 240, 255, 0.14) 0%, transparent 40%),
+          linear-gradient(180deg, rgba(10, 27, 34, 0.96), rgba(6, 16, 21, 0.985));
+        transition:
+          opacity 0.42s ease,
+          visibility 0.42s step-end;
+      }
+
+      .page-loader,
+      .page-loader *,
+      .page-loader *::before,
+      .page-loader *::after {
+        box-sizing: border-box;
+      }
+
+      .page-loader-panel {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 460px;
+        height: 258px;
+        padding: 22px 20px 20px;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(180deg, rgba(13, 31, 42, 0.96), rgba(7, 17, 24, 0.98));
+        box-shadow:
+          0 0 0 2px #06090d,
+          0 0 0 4px rgba(36, 74, 91, 0.92),
+          10px 10px 0 0 rgba(0, 0, 0, 0.28);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page-loader-panel::before {
+        content: "";
+        position: absolute;
+      }
+
+      .page-loader-panel::before {
+        inset: 8px;
+        border: 1px solid rgba(89, 240, 255, 0.22);
+        pointer-events: none;
+      }
+
+      .page-loader-kicker {
+        margin: 0;
+        color: #59f0ff;
+        min-height: 1.2em;
+        font-family: Consolas, "Lucida Console", "Courier New", monospace;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .page-loader-title {
+        display: block;
+        margin-top: 16px;
+        color: #ffd166;
+        min-height: 2.1em;
+        font-family: Consolas, "Lucida Console", "Courier New", monospace;
+        font-size: 1.08rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        line-height: 1.95;
+        text-transform: uppercase;
+      }
+
+      .page-loader-copy {
+        margin: 14px 0 0;
+        color: #d6e0e7;
+        font-family: Consolas, "Lucida Console", "Courier New", monospace;
+        font-size: 0.92rem;
+        line-height: 1.75;
+        min-height: 4.2em;
+      }
+
+      .page-loader-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        margin-top: auto;
+        min-height: 48px;
+      }
+
+      .page-loader-bars span {
+        width: 16px;
+        height: 34px;
+        transform-origin: 50% 100%;
+        animation: loader-pulse 0.95s steps(3, end) infinite;
+      }
+
+      .page-loader-bars span:nth-child(1) {
+        background: #ff9f1c;
+      }
+
+      .page-loader-bars span:nth-child(2) {
+        height: 48px;
+        background: #59f0ff;
+        animation-delay: 0.14s;
+      }
+
+      .page-loader-bars span:nth-child(3) {
+        height: 28px;
+        background: #ff5c8a;
+        animation-delay: 0.28s;
+      }
+
+      body[data-app-ready="true"] .page-loader {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
     </style>
     <script>
@@ -54,12 +192,19 @@
         const owner = "mantukin";
         const repo = "mantukin.github.io";
         const versionParam = "v";
-        const url = new URL(window.location.href);
-        const currentVersion = url.searchParams.get(versionParam);
-        const bootstrapVersion = currentVersion || String(Date.now());
+        const versionStorageKey = "mantukin.github.io.asset-version";
         let bootResolved = false;
         let cssReady = false;
         let versionCheckDone = false;
+        let stylesheetMounted = false;
+        let assetVersionResolved = false;
+        let resolveAssetVersionReady;
+        let appReadyResolved = false;
+        let appShellReady = false;
+
+        window.__ASSET_VERSION_READY__ = new Promise((resolve) => {
+          resolveAssetVersionReady = resolve;
+        });
 
         function finishBoot(force = false) {
           if (bootResolved || (!force && (!cssReady || !versionCheckDone))) {
@@ -79,27 +224,129 @@
           };
 
           reveal();
+          markAppReady();
         }
 
-        window.__ASSET_VERSION__ = bootstrapVersion;
+        function markAppReady(force = false) {
+          if (appReadyResolved) {
+            return;
+          }
+
+          if (!force && (appShellReady === false || bootResolved === false || versionCheckDone === false || cssReady === false)) {
+            return;
+          }
+
+          appReadyResolved = true;
+
+          const applyReadyState = () => {
+            const body = document.body;
+            if (!body) {
+              document.addEventListener("DOMContentLoaded", applyReadyState, { once: true });
+              return;
+            }
+
+            finishBoot(true);
+
+            const fontsReady =
+              document.fonts && typeof document.fonts.ready?.then === "function"
+                ? Promise.race([
+                    document.fonts.ready.catch(() => {}),
+                    new Promise((resolve) => window.setTimeout(resolve, 1400)),
+                  ])
+                : Promise.resolve();
+
+            fontsReady.finally(() => {
+              window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                  body.setAttribute("data-app-ready", "true");
+                });
+              });
+            });
+          };
+
+          applyReadyState();
+        }
+
+        function readStoredVersion() {
+          try {
+            return window.localStorage.getItem(versionStorageKey) || "";
+          } catch {
+            return "";
+          }
+        }
+
+        function storeVersion(version) {
+          if (!version) {
+            return;
+          }
+
+          try {
+            window.localStorage.setItem(versionStorageKey, version);
+          } catch {
+            // Ignore storage failures and keep using the in-memory version.
+          }
+        }
+
+        function mountStylesheet() {
+          if (stylesheetMounted) {
+            return;
+          }
+
+          stylesheetMounted = true;
+
+          const stylesheet = document.createElement("link");
+          stylesheet.rel = "stylesheet";
+          stylesheet.href = window.__versionedAsset("css/style.css");
+          stylesheet.addEventListener("load", () => {
+            cssReady = true;
+            finishBoot();
+          }, { once: true });
+          stylesheet.addEventListener("error", () => {
+            cssReady = true;
+            finishBoot();
+          }, { once: true });
+          document.head.appendChild(stylesheet);
+        }
+
+        function resolveAssetVersion(version) {
+          if (assetVersionResolved) {
+            return;
+          }
+
+          assetVersionResolved = true;
+          window.__ASSET_VERSION__ = version || window.__ASSET_VERSION__ || String(Date.now());
+          versionCheckDone = true;
+          mountStylesheet();
+
+          if (resolveAssetVersionReady) {
+            resolveAssetVersionReady(window.__ASSET_VERSION__);
+            resolveAssetVersionReady = null;
+          }
+
+          finishBoot();
+        }
+
+        window.__ASSET_VERSION__ = readStoredVersion();
         window.__versionedAsset = function (path) {
           const separator = path.includes("?") ? "&" : "?";
-          return path + separator + versionParam + "=" + encodeURIComponent(window.__ASSET_VERSION__);
+          const assetVersion = window.__ASSET_VERSION__ || "bootstrap";
+          return path + separator + versionParam + "=" + encodeURIComponent(assetVersion);
         };
 
-        const stylesheet = document.createElement("link");
-        stylesheet.rel = "stylesheet";
-        stylesheet.href = window.__versionedAsset("css/style.css");
-        stylesheet.addEventListener("load", () => {
-          cssReady = true;
-          finishBoot();
-        }, { once: true });
-        stylesheet.addEventListener("error", () => {
-          cssReady = true;
-          finishBoot();
-        }, { once: true });
-        document.head.appendChild(stylesheet);
         window.setTimeout(() => finishBoot(true), 3200);
+
+        const fallbackVersion = window.__ASSET_VERSION__ || String(Date.now());
+        const fallbackDelay = window.__ASSET_VERSION__ ? 450 : 1200;
+        const fallbackTimer = window.setTimeout(() => {
+          resolveAssetVersion(fallbackVersion);
+        }, fallbackDelay);
+        window.addEventListener("app-shell-ready", () => {
+          appShellReady = true;
+          markAppReady();
+        }, { once: true });
+        window.setTimeout(() => {
+          markAppReady(true);
+        }, 9000);
 
         fetch("https://api.github.com/repos/" + owner + "/" + repo + "/commits?per_page=1", {
           cache: "no-store",
@@ -119,24 +366,35 @@
                 ? commits[0].sha.slice(0, 12)
                 : "";
 
-            if (!latestVersion || currentVersion === latestVersion) {
-              versionCheckDone = true;
-              finishBoot();
-              return;
+            if (latestVersion) {
+              storeVersion(latestVersion);
             }
 
-            url.searchParams.set(versionParam, latestVersion);
-            window.location.replace(url.toString());
+            window.clearTimeout(fallbackTimer);
+            resolveAssetVersion(latestVersion || fallbackVersion);
           })
           .catch(() => {
-            // Keep the bootstrap version when GitHub API is unavailable.
-            versionCheckDone = true;
-            finishBoot();
+            window.clearTimeout(fallbackTimer);
+            resolveAssetVersion(fallbackVersion);
           });
       })();
     </script>
   </head>
-  <body data-booting="true">
+  <body data-booting="true" data-app-ready="false">
+    <div class="page-loader" role="status" aria-live="polite">
+      <div class="page-loader-panel">
+        <p class="page-loader-kicker">IPD Workshop</p>
+        <strong class="page-loader-title">Loading Cabinet</strong>
+        <p class="page-loader-copy">
+          Booting interface, syncing profile feed, and preparing the workshop display.
+        </p>
+        <div class="page-loader-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
     <main class="page-shell">
       <section class="hero-shell pixel-frame">
         <canvas id="tetris-canvas"></canvas>
@@ -300,13 +558,23 @@
     <script>
       (function () {
         const scriptPaths = ["js/main.js", "js/bg-pattern.js", "js/tetris.js"];
+        const ready = window.__ASSET_VERSION_READY__;
 
-        for (const path of scriptPaths) {
-          const script = document.createElement("script");
-          script.src = window.__versionedAsset ? window.__versionedAsset(path) : path;
-          script.async = false;
-          document.body.appendChild(script);
+        function appendScripts() {
+          for (const path of scriptPaths) {
+            const script = document.createElement("script");
+            script.src = window.__versionedAsset ? window.__versionedAsset(path) : path;
+            script.async = false;
+            document.body.appendChild(script);
+          }
         }
+
+        if (ready && typeof ready.then === "function") {
+          ready.then(appendScripts);
+          return;
+        }
+
+        appendScripts();
       })();
     </script>
   </body>

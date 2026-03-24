@@ -892,6 +892,24 @@
         statusPanel.append(title, copy);
       }
 
+      function signalProfileContentReady() {
+        if (!document.body || document.body.dataset.profileReady === "true") {
+          return;
+        }
+
+        document.body.dataset.profileReady = "true";
+        window.dispatchEvent(new Event("profile-content-ready"));
+      }
+
+      function signalAppShellReady() {
+        if (!document.body || document.body.dataset.appShellReady === "true") {
+          return;
+        }
+
+        document.body.dataset.appShellReady = "true";
+        window.dispatchEvent(new Event("app-shell-ready"));
+      }
+
       async function loadProfileReadme() {
         updateStatus(
           "loading",
@@ -935,6 +953,8 @@
             "Featured projects and stack are synced from the latest profile README.",
             false
           );
+          signalProfileContentReady();
+          signalAppShellReady();
         } catch (error) {
           console.error(error);
           contentShell.hidden = true;
@@ -945,6 +965,8 @@
             "The arcade cabinet could not load the profile sections right now.",
             true
           );
+          signalProfileContentReady();
+          signalAppShellReady();
         }
       }
 
