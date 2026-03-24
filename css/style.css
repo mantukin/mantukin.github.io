@@ -159,6 +159,7 @@
       }
 
       .hero-copy {
+        container-type: inline-size;
         display: flex;
         flex-direction: column;
         gap: 18px;
@@ -174,7 +175,7 @@
       }
 
       .hero-logo {
-        width: min(100%, 760px);
+        width: min(100%, 610px);
         aspect-ratio: 3248 / 748;
         position: relative;
         background-color: #ffffff;
@@ -228,7 +229,7 @@
         margin: 0;
         padding-left: 2%;
         font-family: "Press Start 2P", monospace;
-        font-size: clamp(1rem, 2vw, 1.55rem);
+        font-size: min(1.55rem, 4.065cqw);
         line-height: 1.75;
         text-transform: uppercase;
         color: #fff;
@@ -236,7 +237,6 @@
 
       .hero-description {
         margin: 0;
-        max-width: 66ch;
         color: var(--text-soft);
         line-height: 1.8;
         font-style: italic;
@@ -1260,9 +1260,7 @@
           font-size: 0.72rem;
         }
 
-        .hero-subtitle {
-          font-size: 0.85rem;
-        }
+
 
         .section-title2 {
           font-size: 0.85rem;
