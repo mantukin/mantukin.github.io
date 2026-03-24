@@ -246,6 +246,7 @@
         let resolveAssetVersionReady;
         let appReadyResolved = false;
         let appShellReady = false;
+        let serviceWorkerRegistrationStarted = false;
 
         window.__ASSET_VERSION_READY__ = new Promise((resolve) => {
           resolveAssetVersionReady = resolve;
@@ -353,6 +354,21 @@
           document.head.appendChild(stylesheet);
         }
 
+        function registerRuntimeCacheServiceWorker() {
+          if (
+            serviceWorkerRegistrationStarted ||
+            !("serviceWorker" in navigator) ||
+            window.isSecureContext === false
+          ) {
+            return;
+          }
+
+          serviceWorkerRegistrationStarted = true;
+          navigator.serviceWorker
+            .register(window.__versionedAsset("sw.js"), { scope: "./" })
+            .catch(() => {});
+        }
+
         function resolveAssetVersion(version) {
           if (assetVersionResolved) {
             return;
@@ -362,6 +378,7 @@
           window.__ASSET_VERSION__ = version || window.__ASSET_VERSION__ || String(Date.now());
           versionCheckDone = true;
           mountStylesheet();
+          registerRuntimeCacheServiceWorker();
 
           if (resolveAssetVersionReady) {
             resolveAssetVersionReady(window.__ASSET_VERSION__);
@@ -373,6 +390,10 @@
 
         window.__ASSET_VERSION__ = readStoredVersion();
         window.__versionedAsset = function (path) {
+          if (window.location.protocol === "file:") {
+            return path;
+          }
+
           const separator = path.includes("?") ? "&" : "?";
           const assetVersion = window.__ASSET_VERSION__ || "bootstrap";
           return path + separator + versionParam + "=" + encodeURIComponent(assetVersion);

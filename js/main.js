@@ -5,6 +5,19 @@
       const GITHUB_PROFILE_URL = "https://github.com/" + GITHUB_USER;
       const GITHUB_USER_API_URL = "https://api.github.com/users/" + GITHUB_USER;
       const GITHUB_AVATAR_FALLBACK_URL = GITHUB_PROFILE_URL + ".png?size=160";
+      const TECH_STACK_BADGE_ROOT = "assets/tech-stack-badges/";
+      const TECH_STACK_BADGE_MAP = Object.freeze({
+        rust: { path: "rust.svg", label: "Rust" },
+        tauri: { path: "tauri.svg", label: "Tauri" },
+        python: { path: "python.svg", label: "Python" },
+        typescript: { path: "typescript.svg", label: "TypeScript" },
+        javascript: { path: "javascript.svg", label: "JavaScript" },
+        html5: { path: "html5.svg", label: "HTML5" },
+        html: { path: "html5.svg", label: "HTML5" },
+        css3: { path: "css3.svg", label: "CSS3" },
+        css: { path: "css3.svg", label: "CSS3" },
+        blender: { path: "blender.svg", label: "Blender" },
+      });
       const GITHUB_STATS_WIDGETS = [
         {
           alt: "GitHub Stats",
@@ -44,6 +57,29 @@
         } catch {
           return GITHUB_AVATAR_FALLBACK_URL;
         }
+      }
+
+      function withWidgetVersion(source) {
+        try {
+          const url = new URL(source, window.location.href);
+          const version = window.__ASSET_VERSION__ || String(Date.now());
+          url.searchParams.set("v", version);
+          return url.href;
+        } catch {
+          return source;
+        }
+      }
+
+      function withVersionedAsset(path) {
+        if (window.location.protocol === "file:") {
+          return path;
+        }
+
+        if (typeof window.__versionedAsset === "function") {
+          return window.__versionedAsset(path);
+        }
+
+        return path;
       }
 
       function applyProfileAvatar(source) {
@@ -114,6 +150,12 @@
           .replace(/\*\*([^*]+)\*\*/g, "$1")
           .replace(/\s+/g, " ")
           .trim();
+      }
+
+      function normalizeToken(text) {
+        return cleanDisplayText(text)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "");
       }
 
       function escapeRegExp(value) {
@@ -231,6 +273,31 @@
           wrapper.appendChild(node.cloneNode(true));
         }
         return wrapper;
+      }
+
+      function warmWidgetCache(widgetUrls) {
+        if (!("serviceWorker" in navigator) || !Array.isArray(widgetUrls) || !widgetUrls.length) {
+          return;
+        }
+
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            const worker =
+              navigator.serviceWorker.controller ||
+              registration.active ||
+              registration.waiting ||
+              registration.installing;
+
+            if (!worker) {
+              return;
+            }
+
+            worker.postMessage({
+              type: "warm-widget-cache",
+              urls: widgetUrls,
+            });
+          })
+          .catch(() => {});
       }
 
       function extractHeroTagline(container) {
@@ -827,7 +894,19 @@
       function renderTechStack(stackNodes) {
         stackContent.replaceChildren();
         const wrapper = assembleNodes(stackNodes);
-        const badges = Array.from(wrapper.querySelectorAll("img"));
+        const seen = new Set();
+        const badges = Array.from(wrapper.querySelectorAll("img"))
+          .map((badge) => cleanDisplayText(badge.getAttribute("alt") || badge.getAttribute("aria-label") || ""))
+          .filter(Boolean)
+          .filter((label) => {
+            const token = normalizeToken(label);
+            if (!token || seen.has(token)) {
+              return false;
+            }
+
+            seen.add(token);
+            return true;
+          });
 
         if (!badges.length) {
           stackContent.appendChild(
@@ -836,10 +915,25 @@
           return;
         }
 
-        for (const badge of badges) {
+        for (const label of badges) {
+          const token = normalizeToken(label);
+          const badge = TECH_STACK_BADGE_MAP[token];
           const tile = createNode("div", "stack-tile");
-          const image = badge.cloneNode(true);
+          const image = document.createElement("img");
+          image.alt = badge?.label || label;
           image.loading = "lazy";
+          image.decoding = "async";
+
+          if (badge) {
+            image.src = withVersionedAsset(TECH_STACK_BADGE_ROOT + badge.path);
+          } else {
+            image.src =
+              "data:image/svg+xml;charset=UTF-8," +
+              encodeURIComponent(
+                `<svg xmlns="http://www.w3.org/2000/svg" width="210" height="54" viewBox="0 0 210 54" role="img" aria-label="${label}"><rect width="210" height="54" fill="#132632"/><rect x="1.5" y="1.5" width="207" height="51" fill="none" stroke="#244a5b" stroke-width="3"/><text x="105" y="33" fill="#d6e0e7" font-family="Consolas, 'Lucida Console', 'Courier New', monospace" font-size="17" text-anchor="middle">${label}</text></svg>`
+              );
+          }
+
           tile.appendChild(image);
           stackContent.appendChild(tile);
         }
@@ -861,14 +955,16 @@
           }
 
           const media = document.createElement("img");
-          media.src = widget.src;
+          media.src = withWidgetVersion(widget.src);
           media.alt = widget.alt;
-          media.loading = "lazy";
+          media.loading = "eager";
           media.decoding = "async";
           media.referrerPolicy = "no-referrer";
           frame.appendChild(media);
           statsContent.appendChild(frame);
         }
+
+        warmWidgetCache(GITHUB_STATS_WIDGETS.map((widget) => withWidgetVersion(widget.src)));
       }
 
       function updateStatus(state, heading, detail, isError) {
