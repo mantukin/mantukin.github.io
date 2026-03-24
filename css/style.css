@@ -127,8 +127,8 @@
 
       .pixel-inset {
         background: linear-gradient(180deg, rgba(7, 16, 24, 0.25), rgba(11, 25, 35, 0.15));
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
         border: 2px solid rgba(36, 74, 91, 0.88);
         box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.35);
       }
@@ -326,6 +326,8 @@
         min-height: 74px;
         padding: 12px 14px;
         background: linear-gradient(180deg, rgba(14, 33, 46, 0.56), rgba(8, 18, 27, 0.58));
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
         color: var(--text-main);
         box-shadow:
           0 0 0 2px var(--border-dark),
@@ -1241,7 +1243,7 @@
         }
 
         .hero-subtitle {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
         }
 
         .section-title2 {
@@ -1274,6 +1276,11 @@
           padding-bottom: 0;
           border-bottom: 0;
         }
+
+        .hero-description {
+          font-size: small;
+        }
+
       }
 
       @media (max-width: 720px) {
@@ -1292,7 +1299,8 @@
           background: linear-gradient(180deg, rgba(6, 16, 21, 0.1), rgba(6, 16, 21, 0.34));
         }
 
-        .pixel-inset {
+        .pixel-inset,
+        .app-shortcut {
           backdrop-filter: none;
           -webkit-backdrop-filter: none;
         }
