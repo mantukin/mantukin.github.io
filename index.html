@@ -2,6 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IPD Workshop</title>
     <meta
@@ -15,7 +18,56 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/style.css" />
+    <script>
+      (function () {
+        const owner = "mantukin";
+        const repo = "mantukin.github.io";
+        const versionParam = "v";
+        const url = new URL(window.location.href);
+        const currentVersion = url.searchParams.get(versionParam);
+        const bootstrapVersion = currentVersion || String(Date.now());
+
+        window.__ASSET_VERSION__ = bootstrapVersion;
+        window.__versionedAsset = function (path) {
+          const separator = path.includes("?") ? "&" : "?";
+          return path + separator + versionParam + "=" + encodeURIComponent(window.__ASSET_VERSION__);
+        };
+
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = window.__versionedAsset("css/style.css");
+        document.head.appendChild(stylesheet);
+
+        fetch("https://api.github.com/repos/" + owner + "/" + repo + "/commits?per_page=1", {
+          cache: "no-store",
+          headers: {
+            Accept: "application/vnd.github+json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Version check failed with status " + response.status);
+            }
+            return response.json();
+          })
+          .then((commits) => {
+            const latestVersion =
+              Array.isArray(commits) && commits[0] && commits[0].sha
+                ? commits[0].sha.slice(0, 12)
+                : "";
+
+            if (!latestVersion || currentVersion === latestVersion) {
+              return;
+            }
+
+            url.searchParams.set(versionParam, latestVersion);
+            window.location.replace(url.toString());
+          })
+          .catch(() => {
+            // Keep the bootstrap version when GitHub API is unavailable.
+          });
+      })();
+    </script>
   </head>
   <body>
     <main class="page-shell">
@@ -32,16 +84,52 @@
           <p id="hero-description" class="hero-description">
             Loading workshop note...
           </p>
-          <div class="hero-actions">
-            <a class="arcade-button" href="https://github.com/mantukin" target="_blank" rel="noreferrer">GitHub Profile</a>
-            <a class="arcade-button secondary" href="https://mantukin.github.io/shakalfx/" target="_blank" rel="noreferrer">Open ShakalFX</a>
-            <a class="arcade-button ghost" href="#projects">Jump to Projects</a>
-          </div>
-          <div class="hero-strip" aria-label="Core stack">
-            <span class="hero-chip">Rust</span>
-            <span class="hero-chip">Python</span>
-            <span class="hero-chip">TypeScript</span>
-            <span class="hero-chip">JavaScript</span>
+          <div class="hero-launchpad" aria-label="Quick web apps">
+            <p class="hero-launchpad-label">Quick Web Apps</p>
+            <div class="hero-launchpad-grid">
+              <a
+                class="app-shortcut shakalfx"
+                href="https://mantukin.github.io/shakalfx/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open ShakalFX"
+              >
+                <span class="app-shortcut-icon-shell">
+                  <img
+                    class="app-shortcut-icon"
+                    src="assets/app-icons/shakalfx.svg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="app-shortcut-copy">
+                  <span class="app-shortcut-title">ShakalFX</span>
+                  <span class="app-shortcut-meta">Glitch Art Lab</span>
+                </span>
+              </a>
+              <a
+                class="app-shortcut motif"
+                href="https://mantukin.github.io/motif/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open Motif"
+              >
+                <span class="app-shortcut-icon-shell">
+                  <img
+                    class="app-shortcut-icon"
+                    src="assets/app-icons/motif.png"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="app-shortcut-copy">
+                  <span class="app-shortcut-title">Motif</span>
+                  <span class="app-shortcut-meta">Midi Sketchpad</span>
+                </span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -142,8 +230,17 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/bg-pattern.js"></script>
-    <script src="js/tetris.js"></script>
+    <script>
+      (function () {
+        const scriptPaths = ["js/main.js", "js/bg-pattern.js", "js/tetris.js"];
+
+        for (const path of scriptPaths) {
+          const script = document.createElement("script");
+          script.src = window.__versionedAsset ? window.__versionedAsset(path) : path;
+          script.async = false;
+          document.body.appendChild(script);
+        }
+      })();
+    </script>
   </body>
 </html>

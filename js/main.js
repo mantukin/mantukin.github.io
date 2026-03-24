@@ -5,6 +5,21 @@
       const GITHUB_PROFILE_URL = "https://github.com/" + GITHUB_USER;
       const GITHUB_USER_API_URL = "https://api.github.com/users/" + GITHUB_USER;
       const GITHUB_AVATAR_FALLBACK_URL = GITHUB_PROFILE_URL + ".png?size=160";
+      const GITHUB_STATS_WIDGETS = [
+        {
+          alt: "GitHub Stats",
+          src: "https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mantukin&theme=tokyonight",
+        },
+        {
+          alt: "Top Languages",
+          src: "https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mantukin&theme=tokyonight",
+        },
+        {
+          alt: "GitHub Streak",
+          src: "https://streak-stats.demolab.com/?user=mantukin&theme=tokyonight&hide_border=true&background=1a1b27",
+          wide: true,
+        },
+      ];
 
       const contentShell = document.getElementById("content-shell");
       const projectsContent = document.getElementById("projects-content");
@@ -143,8 +158,13 @@
 
         for (const source of container.querySelectorAll("source")) {
           const srcset = source.getAttribute("srcset");
-          if (srcset && !/^(https?:|data:)/i.test(srcset.trim())) {
+          if (!srcset) {
+            continue;
+          }
+
+          if (!/^(https?:|data:)/i.test(srcset.trim())) {
             source.setAttribute("srcset", rewriteRelativeSrcset(srcset));
+            continue;
           }
         }
 
@@ -825,31 +845,27 @@
         }
       }
 
-      function renderStats(statNodes) {
+      function renderStats() {
         statsContent.replaceChildren();
-        const wrapper = assembleNodes(statNodes);
-        const pictures = Array.from(wrapper.querySelectorAll("picture"));
-        const standaloneImages = Array.from(wrapper.querySelectorAll("img")).filter(
-          (image) => !image.closest("picture")
-        );
-        const entries = pictures.length ? pictures : standaloneImages;
-
-        if (!entries.length) {
+        if (!GITHUB_STATS_WIDGETS.length) {
           statsContent.appendChild(
-            createNode("p", "empty-state", "No stat cards were found in the GitHub Stats section.")
+            createNode("p", "empty-state", "No stat cards are configured for the GitHub Stats section.")
           );
           return;
         }
 
-        for (const entry of entries) {
+        for (const widget of GITHUB_STATS_WIDGETS) {
           const frame = createNode("div", "stat-card");
-          if (/streak/i.test(entry.outerHTML)) {
+          if (widget.wide) {
             frame.classList.add("stat-card-wide");
           }
-          const media = entry.cloneNode(true);
-          for (const image of media.querySelectorAll("img")) {
-            image.loading = "lazy";
-          }
+
+          const media = document.createElement("img");
+          media.src = widget.src;
+          media.alt = widget.alt;
+          media.loading = "lazy";
+          media.decoding = "async";
+          media.referrerPolicy = "no-referrer";
           frame.appendChild(media);
           statsContent.appendChild(frame);
         }
@@ -898,27 +914,25 @@
           });
 
           rewriteRelativeAssets(parsed);
-
           const featuredProjects = collectSectionNodes(parsed, "featured projects");
           const techStack = collectSectionNodes(parsed, "tech stack");
-          const githubStats = collectSectionNodes(parsed, "github stats");
           const workshopTagline = extractHeroTagline(parsed);
 
-          if (!featuredProjects.length || !techStack.length || !githubStats.length) {
+          if (!featuredProjects.length || !techStack.length) {
             throw new Error("One or more curated README sections could not be found.");
           }
 
           heroDescription.textContent = workshopTagline;
           renderProjects(featuredProjects);
           renderTechStack(techStack);
-          renderStats(githubStats);
+          renderStats();
 
           contentShell.hidden = false;
           statusPanel.hidden = true;
           updateStatus(
             "ready",
             "Ready",
-            "Curated sections are synced from the latest profile README.",
+            "Featured projects and stack are synced from the latest profile README.",
             false
           );
         } catch (error) {

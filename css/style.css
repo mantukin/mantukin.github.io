@@ -242,20 +242,41 @@
         font-style: italic;
       }
 
-      .hero-actions,
       .project-links {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
       }
 
+      .hero-launchpad {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 4px;
+        padding-top: 10px;
+      }
+
+      .hero-launchpad-label {
+        margin: 0;
+        color: var(--accent-cool);
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .hero-launchpad-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
       .arcade-button,
-      .inline-button {
+      .inline-button,
+      .app-shortcut {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        text-transform: uppercase;
         letter-spacing: 0.08em;
         transition:
           transform 140ms steps(2, end),
@@ -294,15 +315,96 @@
       }
 
       .arcade-button:hover,
-      .inline-button:hover {
+      .inline-button:hover,
+      .app-shortcut:hover {
         transform: translate(-2px, -2px);
       }
 
-      .hero-strip {
+      .app-shortcut {
+        justify-content: flex-start;
+        gap: 12px;
+        min-height: 74px;
+        padding: 12px 14px;
+        background: linear-gradient(180deg, rgba(14, 33, 46, 0.56), rgba(8, 18, 27, 0.58));
+        color: var(--text-main);
+        box-shadow:
+          0 0 0 2px var(--border-dark),
+          0 0 0 4px rgba(89, 240, 255, 0.14),
+          6px 6px 0 0 rgba(0, 0, 0, 0.24);
+      }
+
+      .app-shortcut.shakalfx {
+        box-shadow:
+          0 0 0 2px var(--border-dark),
+          0 0 0 4px rgba(255, 159, 28, 0.16),
+          6px 6px 0 0 rgba(0, 0, 0, 0.24);
+      }
+
+      .app-shortcut.motif {
+        box-shadow:
+          0 0 0 2px var(--border-dark),
+          0 0 0 4px rgba(255, 92, 138, 0.16),
+          6px 6px 0 0 rgba(0, 0, 0, 0.24);
+      }
+
+      .app-shortcut-icon-shell {
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, rgba(19, 44, 58, 0.96), rgba(8, 18, 27, 0.98));
+        box-shadow:
+          inset 0 0 0 1px rgba(89, 240, 255, 0.16),
+          0 0 0 1px rgba(6, 9, 13, 0.96);
+      }
+
+      .app-shortcut.shakalfx .app-shortcut-icon-shell {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 159, 28, 0.22),
+          0 0 0 1px rgba(6, 9, 13, 0.96);
+      }
+
+      .app-shortcut.motif .app-shortcut-icon-shell {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 92, 138, 0.22),
+          0 0 0 1px rgba(6, 9, 13, 0.96);
+      }
+
+      .app-shortcut-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 7px;
+      }
+
+      .app-shortcut-copy {
+        min-width: 0;
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: auto;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .app-shortcut-title {
+        font-family: "Press Start 2P", monospace;
+        font-size: clamp(0.62rem, 1.25vw, 0.76rem);
+        line-height: 1.55;
+        letter-spacing: 0.06em;
+      }
+
+      .app-shortcut-meta {
+        color: var(--accent-cool);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .app-shortcut.shakalfx .app-shortcut-meta {
+        color: var(--accent-secondary);
+      }
+
+      .app-shortcut.motif .app-shortcut-meta {
+        color: var(--accent-hot);
       }
 
       .hero-chip {
@@ -369,7 +471,9 @@
 
       .console-lights {
         display: flex;
+        align-self: center;
         gap: 10px;
+        margin: auto 0;
         padding: 2px 0 0;
       }
 
@@ -420,7 +524,7 @@
       }
 
       .console-profile-kicker {
-        color: var(--accent-secondary);
+        color: var(--accent-cool);
         font-size: 0.72rem;
         letter-spacing: 0.14em;
         text-transform: uppercase;
@@ -458,7 +562,6 @@
       }
 
       .status-meter {
-        margin-top: auto;
         padding: 14px;
         background: linear-gradient(180deg, rgba(12, 27, 36, 0.25), rgba(7, 17, 24, 0.15));
         border: 1px solid rgba(255, 209, 102, 0.14);
@@ -854,8 +957,8 @@
           padding: 18px;
         }
 
-        .hero-actions {
-          flex-direction: column;
+        .hero-launchpad-grid {
+          grid-template-columns: 1fr;
         }
 
         .console-head {
@@ -869,7 +972,8 @@
         }
 
         .arcade-button,
-        .inline-button {
+        .inline-button,
+        .app-shortcut {
           width: 100%;
         }
 
@@ -930,6 +1034,7 @@
 
         .arcade-button,
         .inline-button,
+        .app-shortcut,
         .project-card {
           animation: none;
           transition: none;
@@ -937,6 +1042,7 @@
 
         .arcade-button:hover,
         .inline-button:hover,
+        .app-shortcut:hover,
         .project-card:hover {
           transform: none;
         }
