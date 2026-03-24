@@ -186,6 +186,51 @@
         visibility: hidden;
         pointer-events: none;
       }
+
+      @media (max-width: 560px) {
+        .page-loader-panel {
+          width: calc(100vw - 28px);
+          height: 236px;
+          padding: 18px 16px 16px;
+        }
+
+        .page-loader-kicker {
+          font-size: 0.68rem;
+          letter-spacing: 0.14em;
+        }
+
+        .page-loader-title {
+          margin-top: 12px;
+          min-height: 1.9em;
+          font-size: 0.94rem;
+          letter-spacing: 0.1em;
+          line-height: 1.7;
+        }
+
+        .page-loader-copy {
+          margin-top: 12px;
+          min-height: 3.6em;
+          font-size: 0.82rem;
+          line-height: 1.6;
+        }
+
+        .page-loader-bars {
+          min-height: 40px;
+        }
+
+        .page-loader-bars span {
+          width: 14px;
+          height: 30px;
+        }
+
+        .page-loader-bars span:nth-child(2) {
+          height: 40px;
+        }
+
+        .page-loader-bars span:nth-child(3) {
+          height: 24px;
+        }
+      }
     </style>
     <script>
       (function () {
