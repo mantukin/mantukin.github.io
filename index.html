@@ -246,8 +246,6 @@
         let resolveAssetVersionReady;
         let appReadyResolved = false;
         let appShellReady = false;
-        let serviceWorkerRegistrationStarted = false;
-
         window.__ASSET_VERSION_READY__ = new Promise((resolve) => {
           resolveAssetVersionReady = resolve;
         });
@@ -354,21 +352,6 @@
           document.head.appendChild(stylesheet);
         }
 
-        function registerRuntimeCacheServiceWorker() {
-          if (
-            serviceWorkerRegistrationStarted ||
-            !("serviceWorker" in navigator) ||
-            window.isSecureContext === false
-          ) {
-            return;
-          }
-
-          serviceWorkerRegistrationStarted = true;
-          navigator.serviceWorker
-            .register(window.__versionedAsset("sw.js"), { scope: "./" })
-            .catch(() => {});
-        }
-
         function resolveAssetVersion(version) {
           if (assetVersionResolved) {
             return;
@@ -378,7 +361,6 @@
           window.__ASSET_VERSION__ = version || window.__ASSET_VERSION__ || String(Date.now());
           versionCheckDone = true;
           mountStylesheet();
-          registerRuntimeCacheServiceWorker();
 
           if (resolveAssetVersionReady) {
             resolveAssetVersionReady(window.__ASSET_VERSION__);
@@ -623,7 +605,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
       (function () {
-        const scriptPaths = ["js/main.js", "js/bg-pattern.js", "js/tetris.js"];
+        const scriptPaths = ["js/generated-github-stats.js", "js/main.js", "js/bg-pattern.js", "js/tetris.js"];
         const ready = window.__ASSET_VERSION_READY__;
 
         function appendScripts() {

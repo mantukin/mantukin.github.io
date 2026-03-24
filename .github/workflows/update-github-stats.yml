@@ -1,0 +1,45 @@
+name: Update GitHub Stats Snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * *"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "js/generated-github-stats.js"
+
+permissions:
+  contents: write
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate stats snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_STATS_USER: mantukin
+        run: node scripts/update-github-stats.mjs
+
+      - name: Commit updated snapshot
+        run: |
+          if git diff --quiet -- js/generated-github-stats.js; then
+            echo "No stats changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/generated-github-stats.js
+          git commit -m "chore: update GitHub stats snapshot"
+          git push

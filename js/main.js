@@ -5,6 +5,8 @@
       const GITHUB_PROFILE_URL = "https://github.com/" + GITHUB_USER;
       const GITHUB_USER_API_URL = "https://api.github.com/users/" + GITHUB_USER;
       const GITHUB_AVATAR_FALLBACK_URL = GITHUB_PROFILE_URL + ".png?size=160";
+      const GITHUB_STATS_CACHE_KEY = "mantukin.github.io.stats-snapshot.v1";
+      const GITHUB_STATS_CACHE_TTL_MS = 1000 * 60 * 30;
       const TECH_STACK_BADGE_ROOT = "assets/tech-stack-badges/";
       const TECH_STACK_BADGE_MAP = Object.freeze({
         rust: { path: "rust.svg", label: "Rust" },
@@ -18,21 +20,47 @@
         css: { path: "css3.svg", label: "CSS3" },
         blender: { path: "blender.svg", label: "Blender" },
       });
-      const GITHUB_STATS_WIDGETS = [
+      const LANGUAGE_COLOR_MAP = Object.freeze({
+        python: "#3572a5",
+        javascript: "#f1e05a",
+        typescript: "#3178c6",
+        rust: "#dea584",
+        html: "#e34f26",
+        html5: "#e34f26",
+        css: "#1572b6",
+        css3: "#1572b6",
+        blender: "#e87d0d",
+        shell: "#89e051",
+      });
+      let githubProfileData = null;
+      let githubOwnedReposPromise = null;
+      let githubStatsSnapshotPromise = null;
+      const STATS_CARD_ICON_PATHS = Object.freeze([
         {
-          alt: "GitHub Stats",
-          src: "https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mantukin&theme=tokyonight",
+          fillRule: "evenodd",
+          path: "M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z",
         },
         {
-          alt: "Top Languages",
-          src: "https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mantukin&theme=tokyonight",
+          fillRule: "evenodd",
+          path: "M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.001 4.001 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z",
         },
         {
-          alt: "GitHub Streak",
-          src: "https://streak-stats.demolab.com/?user=mantukin&theme=tokyonight&hide_border=true&background=1a1b27",
-          wide: true,
+          fillRule: "evenodd",
+          path: "M7.177 3.073L9.573.677A.25.25 0 0110 .854v4.792a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354zM3.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zM11 2.5h-1V4h1a1 1 0 011 1v5.628a2.251 2.251 0 101.5 0V5A2.5 2.5 0 0011 2.5zm1 10.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM3.75 12a.75.75 0 100 1.5.75.75 0 000-1.5z",
         },
-      ];
+        {
+          fillRule: "evenodd",
+          path: "M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z",
+        },
+        {
+          fillRule: "evenodd",
+          path: "M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z",
+        },
+      ]);
+      const STATS_GITHUB_MARK_PATH =
+        "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z";
+      const STREAK_FIRE_PATH =
+        "M 1.5 0.67 C 1.5 0.67 2.24 3.32 2.24 5.47 C 2.24 7.53 0.89 9.2 -1.17 9.2 C -3.23 9.2 -4.79 7.53 -4.79 5.47 L -4.76 5.11 C -6.78 7.51 -8 10.62 -8 13.99 C -8 18.41 -4.42 22 0 22 C 4.42 22 8 18.41 8 13.99 C 8 8.6 5.41 3.79 1.5 0.67 Z M -0.29 19 C -2.07 19 -3.51 17.6 -3.51 15.86 C -3.51 14.24 -2.46 13.1 -0.7 12.74 C 1.07 12.38 2.9 11.53 3.92 10.16 C 4.31 11.45 4.51 12.81 4.51 14.2 C 4.51 16.85 2.36 19 -0.29 19 Z";
 
       const contentShell = document.getElementById("content-shell");
       const projectsContent = document.getElementById("projects-content");
@@ -56,17 +84,6 @@
           return url.href;
         } catch {
           return GITHUB_AVATAR_FALLBACK_URL;
-        }
-      }
-
-      function withWidgetVersion(source) {
-        try {
-          const url = new URL(source, window.location.href);
-          const version = window.__ASSET_VERSION__ || String(Date.now());
-          url.searchParams.set("v", version);
-          return url.href;
-        } catch {
-          return source;
         }
       }
 
@@ -128,6 +145,7 @@
           }
 
           const profile = await response.json();
+          githubProfileData = profile;
           applyProfileAvatar(profile.avatar_url || GITHUB_AVATAR_FALLBACK_URL);
         } catch (error) {
           console.warn("Avatar load failed, falling back to direct GitHub avatar URL.", error);
@@ -249,6 +267,80 @@
         return link;
       }
 
+      function escapeSvgText(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatStatNumber(value) {
+        return new Intl.NumberFormat("en-US", {
+          maximumFractionDigits: 0,
+        }).format(Number(value) || 0);
+      }
+
+      function createSvgElement(markup) {
+        const parser = new DOMParser();
+        const parsed = parser.parseFromString(markup, "image/svg+xml");
+        const svg = parsed.documentElement;
+        if (!svg || svg.nodeName.toLowerCase() === "parsererror") {
+          throw new Error("Could not parse stats SVG template.");
+        }
+
+        return document.importNode(svg, true);
+      }
+
+      function createStatsSvgCard(svgMarkup, wide) {
+        const frame = createNode("article", "stat-card");
+        if (wide) {
+          frame.classList.add("stat-card-wide");
+        }
+
+        frame.appendChild(createSvgElement(svgMarkup));
+        return frame;
+      }
+
+      function polarToPoint(radius, angleDeg) {
+        const radians = (angleDeg * Math.PI) / 180;
+        const x = Math.cos(radians) * radius;
+        const y = Math.sin(radians) * radius;
+        return `${x},${y}`;
+      }
+
+      function getCirclePoint(cx, cy, radius, angleDeg) {
+        const radians = (angleDeg * Math.PI) / 180;
+        return {
+          x: cx + Math.cos(radians) * radius,
+          y: cy + Math.sin(radians) * radius,
+        };
+      }
+
+      function describeOpenCircleArc(cx, cy, radius, startAngleDeg, endAngleDeg) {
+        const start = getCirclePoint(cx, cy, radius, startAngleDeg);
+        const end = getCirclePoint(cx, cy, radius, endAngleDeg);
+        let sweep = endAngleDeg - startAngleDeg;
+        while (sweep <= 0) {
+          sweep += 360;
+        }
+
+        const largeArc = sweep > 180 ? 1 : 0;
+        return `M${start.x.toFixed(3)} ${start.y.toFixed(3)} A${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`;
+      }
+
+      function describeDonutSegment(startAngleDeg, endAngleDeg, outerRadius, innerRadius) {
+        const sweep = Math.max(0.0001, endAngleDeg - startAngleDeg);
+        const largeArc = sweep > 180 ? 1 : 0;
+        const outerStart = polarToPoint(outerRadius, startAngleDeg);
+        const outerEnd = polarToPoint(outerRadius, endAngleDeg);
+        const innerEnd = polarToPoint(innerRadius, endAngleDeg);
+        const innerStart = polarToPoint(innerRadius, startAngleDeg);
+
+        return `M${outerStart}A${outerRadius},${outerRadius},0,${largeArc},1,${outerEnd}L${innerEnd}A${innerRadius},${innerRadius},0,${largeArc},0,${innerStart}Z`;
+      }
+
       function collectSectionNodes(container, targetHeading) {
         const heading = Array.from(container.querySelectorAll("h2")).find(
           (node) => normalizeHeading(node.textContent) === targetHeading
@@ -275,29 +367,364 @@
         return wrapper;
       }
 
-      function warmWidgetCache(widgetUrls) {
-        if (!("serviceWorker" in navigator) || !Array.isArray(widgetUrls) || !widgetUrls.length) {
-          return;
+      function readCachedStatsSnapshot() {
+        try {
+          const raw = window.localStorage.getItem(GITHUB_STATS_CACHE_KEY);
+          if (!raw) {
+            return null;
+          }
+
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed.timestamp !== "number" || !parsed.data) {
+            return null;
+          }
+
+          return parsed;
+        } catch {
+          return null;
+        }
+      }
+
+      function readStaticStatsSnapshot() {
+        const payload = window.__STATIC_GITHUB_STATS__;
+        if (!payload || typeof payload !== "object") {
+          return null;
         }
 
-        navigator.serviceWorker.ready
-          .then((registration) => {
-            const worker =
-              navigator.serviceWorker.controller ||
-              registration.active ||
-              registration.waiting ||
-              registration.installing;
+        const snapshot = payload.data && typeof payload.data === "object" ? payload.data : payload;
+        if (!snapshot || !snapshot.stats || !snapshot.commits || !Array.isArray(snapshot.languages)) {
+          return null;
+        }
 
-            if (!worker) {
-              return;
+        return snapshot;
+      }
+
+      function writeCachedStatsSnapshot(data) {
+        try {
+          window.localStorage.setItem(
+            GITHUB_STATS_CACHE_KEY,
+            JSON.stringify({
+              timestamp: Date.now(),
+              data,
+            })
+          );
+        } catch {
+          // Ignore storage failures and keep the snapshot in memory only.
+        }
+      }
+
+      async function fetchGitHubJson(url, extraHeaders) {
+        const response = await fetch(url, {
+          cache: "no-store",
+          headers: {
+            Accept: "application/vnd.github+json",
+            ...(extraHeaders || {}),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`GitHub returned ${response.status} for ${url}`);
+        }
+
+        return response.json();
+      }
+
+      async function loadGitHubProfileData() {
+        if (githubProfileData) {
+          return githubProfileData;
+        }
+
+        githubProfileData = await fetchGitHubJson(GITHUB_USER_API_URL);
+        return githubProfileData;
+      }
+
+      async function loadGitHubOwnedRepos() {
+        if (githubOwnedReposPromise) {
+          return githubOwnedReposPromise;
+        }
+
+        githubOwnedReposPromise = (async () => {
+          const repos = [];
+
+          for (let page = 1; page <= 5; page += 1) {
+            const batch = await fetchGitHubJson(
+              `${GITHUB_USER_API_URL}/repos?per_page=100&type=owner&sort=pushed&page=${page}`
+            );
+
+            repos.push(...batch.filter((repo) => !repo.fork));
+
+            if (batch.length < 100) {
+              break;
+            }
+          }
+
+          return repos;
+        })().catch((error) => {
+          githubOwnedReposPromise = null;
+          throw error;
+        });
+
+        return githubOwnedReposPromise;
+      }
+
+      async function loadIssueSearchCount(query) {
+        const result = await fetchGitHubJson(
+          `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=1`
+        );
+        return result.total_count || 0;
+      }
+
+      async function loadCommitSearch(query) {
+        const items = [];
+        let totalCount = 0;
+
+        for (let page = 1; page <= 10; page += 1) {
+          const result = await fetchGitHubJson(
+            `https://api.github.com/search/commits?q=${encodeURIComponent(query)}&per_page=100&page=${page}&sort=author-date&order=desc`,
+            {
+              Accept: "application/vnd.github.cloak-preview+json",
+            }
+          );
+
+          if (page === 1) {
+            totalCount = result.total_count || 0;
+          }
+
+          items.push(...(result.items || []));
+
+          if (!result.items || result.items.length < 100 || items.length >= Math.min(totalCount, 1000)) {
+            break;
+          }
+        }
+
+        return {
+          totalCount,
+          items,
+        };
+      }
+
+      function getLanguageColor(name) {
+        return LANGUAGE_COLOR_MAP[normalizeToken(name)] || "#59f0ff";
+      }
+
+      function parseDateKey(dateKey) {
+        const parsed = new Date(`${dateKey}T00:00:00Z`);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      function formatShortDate(dateKey) {
+        const parsed = parseDateKey(dateKey);
+        if (!parsed) {
+          return "N/A";
+        }
+
+        return new Intl.DateTimeFormat("en", {
+          month: "short",
+          day: "numeric",
+        }).format(parsed);
+      }
+
+      function formatLongDate(value) {
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+          return "N/A";
+        }
+
+        return new Intl.DateTimeFormat("en", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }).format(parsed);
+      }
+
+      function formatDateRange(start, end) {
+        if (!start || !end) {
+          return "No run yet";
+        }
+
+        if (start === end) {
+          return formatShortDate(start);
+        }
+
+        return `${formatShortDate(start)} - ${formatShortDate(end)}`;
+      }
+
+      function diffDays(left, right) {
+        const leftDate = parseDateKey(left);
+        const rightDate = parseDateKey(right);
+        if (!leftDate || !rightDate) {
+          return Infinity;
+        }
+
+        return Math.round((rightDate.getTime() - leftDate.getTime()) / 86400000);
+      }
+
+      function buildLanguageBreakdown(repos) {
+        const counts = new Map();
+
+        for (const repo of repos) {
+          const language = cleanDisplayText(repo.language || "");
+          if (!language) {
+            continue;
+          }
+
+          counts.set(language, (counts.get(language) || 0) + 1);
+        }
+
+        const total = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
+
+        return Array.from(counts.entries())
+          .map(([name, count]) => ({
+            name,
+            count,
+            share: total ? count / total : 0,
+            color: getLanguageColor(name),
+          }))
+          .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name))
+          .slice(0, 5);
+      }
+
+      function analyzeCommitStreaks(items) {
+        const commitsByDay = new Map();
+        const repositories = new Set();
+
+        for (const item of items) {
+          const day = (item.commit?.author?.date || item.commit?.committer?.date || "").slice(0, 10);
+          if (!day) {
+            continue;
+          }
+
+          commitsByDay.set(day, (commitsByDay.get(day) || 0) + 1);
+
+          if (item.repository?.full_name) {
+            repositories.add(item.repository.full_name);
+          }
+        }
+
+        const days = Array.from(commitsByDay.keys()).sort((left, right) => left.localeCompare(right));
+        if (!days.length) {
+          return {
+            total: items.length,
+            contributedTo: repositories.size,
+            current: { length: 0, start: "", end: "" },
+            longest: { length: 0, start: "", end: "" },
+          };
+        }
+
+        let currentRunStart = days[0];
+        let currentRunLength = 1;
+        let previousDay = days[0];
+        let longest = { length: 1, start: days[0], end: days[0] };
+
+        for (let index = 1; index < days.length; index += 1) {
+          const day = days[index];
+          if (diffDays(previousDay, day) === 1) {
+            currentRunLength += 1;
+          } else {
+            if (currentRunLength > longest.length) {
+              longest = {
+                length: currentRunLength,
+                start: currentRunStart,
+                end: previousDay,
+              };
             }
 
-            worker.postMessage({
-              type: "warm-widget-cache",
-              urls: widgetUrls,
-            });
+            currentRunStart = day;
+            currentRunLength = 1;
+          }
+
+          previousDay = day;
+        }
+
+        if (currentRunLength > longest.length) {
+          longest = {
+            length: currentRunLength,
+            start: currentRunStart,
+            end: previousDay,
+          };
+        }
+
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const distanceFromToday = diffDays(previousDay, todayKey);
+        const current =
+          distanceFromToday <= 1
+            ? {
+                length: currentRunLength,
+                start: currentRunStart,
+                end: previousDay,
+              }
+            : { length: 0, start: "", end: "" };
+
+        return {
+          total: items.length,
+          contributedTo: repositories.size,
+          current,
+          longest,
+        };
+      }
+
+      async function loadGitHubStatsSnapshot() {
+        const staticSnapshot = readStaticStatsSnapshot();
+        if (staticSnapshot) {
+          writeCachedStatsSnapshot(staticSnapshot);
+          return staticSnapshot;
+        }
+
+        const cached = readCachedStatsSnapshot();
+        if (cached && Date.now() - cached.timestamp < GITHUB_STATS_CACHE_TTL_MS) {
+          return cached.data;
+        }
+
+        if (githubStatsSnapshotPromise) {
+          return githubStatsSnapshotPromise;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const yearCommitQuery = `author:${GITHUB_USER} author-date:${currentYear}-01-01..${currentYear}-12-31`;
+        const allCommitQuery = `author:${GITHUB_USER}`;
+
+        githubStatsSnapshotPromise = Promise.all([
+          loadGitHubProfileData(),
+          loadGitHubOwnedRepos(),
+          loadIssueSearchCount(`author:${GITHUB_USER} type:pr`),
+          loadIssueSearchCount(`author:${GITHUB_USER} type:issue`),
+          loadCommitSearch(yearCommitQuery),
+          loadCommitSearch(allCommitQuery),
+        ])
+          .then(([profile, repos, totalPrs, totalIssues, yearCommitSearch, allCommitSearch]) => {
+            const totalStars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
+            const streaks = analyzeCommitStreaks(allCommitSearch.items);
+            const snapshot = {
+              year: currentYear,
+              stats: {
+                totalStars,
+                yearCommits: yearCommitSearch.totalCount || 0,
+                totalPrs,
+                totalIssues,
+                contributedTo: Math.max(repos.length, streaks.contributedTo),
+              },
+              languages: buildLanguageBreakdown(repos),
+              commits: {
+                total: allCommitSearch.totalCount || streaks.total,
+                current: streaks.current,
+                longest: streaks.longest,
+                since: profile.created_at || "",
+              },
+            };
+
+            writeCachedStatsSnapshot(snapshot);
+            return snapshot;
           })
-          .catch(() => {});
+          .catch((error) => {
+            githubStatsSnapshotPromise = null;
+            if (cached?.data) {
+              return cached.data;
+            }
+
+            throw error;
+          });
+
+        return githubStatsSnapshotPromise;
       }
 
       function extractHeroTagline(container) {
@@ -939,32 +1366,183 @@
         }
       }
 
-      function renderStats() {
+      function buildStatsOverviewSvg(snapshot) {
+        const rows = [
+          { label: "Total Stars:", value: formatStatNumber(snapshot.stats.totalStars) },
+          { label: `${snapshot.year} Commits:`, value: formatStatNumber(snapshot.stats.yearCommits) },
+          { label: "Total PRs:", value: formatStatNumber(snapshot.stats.totalPrs) },
+          { label: "Total Issues:", value: formatStatNumber(snapshot.stats.totalIssues) },
+          { label: "Contributed to:", value: formatStatNumber(snapshot.stats.contributedTo) },
+        ];
+        const iconMarkup = STATS_CARD_ICON_PATHS.map((icon, index) => {
+          const offset = (index * 25.2).toFixed(1).replace(/\.0$/, "");
+          return `<g transform="translate(0,${offset})" width="14" height="14" fill="#bf91f3"><path fill-rule="${icon.fillRule}" d="${icon.path}"></path></g>`;
+        }).join("");
+        const labelMarkup = rows
+          .map((row, index) => {
+            const y = 14 + index * 25.2;
+            return `<text x="21" y="${y}" style="fill: #38bdae; font-size: 14px;">${escapeSvgText(row.label)}</text>`;
+          })
+          .join("");
+        const valueMarkup = rows
+          .map((row, index) => {
+            const y = 14 + index * 25.2;
+            return `<text x="130" y="${y}" style="fill: #38bdae; font-size: 14px;">${escapeSvgText(row.value)}</text>`;
+          })
+          .join("");
+
+        return `
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="200" viewBox="0 0 340 200" role="img" aria-label="GitHub stats overview" style="font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', sans-serif;">
+  <rect x="1" y="1" rx="5" ry="5" height="99%" width="99.41176470588235%" stroke="#1a1b27" stroke-width="1" fill="#1a1b27" stroke-opacity="1"></rect>
+  <text x="30" y="40" style="font-size: 22px; fill: #70a5fd;">Stats</text>
+  <g transform="translate(0,40)">
+    <g transform="translate(30,20)">
+      ${iconMarkup}
+      ${labelMarkup}
+      ${valueMarkup}
+    </g>
+    <g transform="translate(220,20)">
+      <g transform="scale(6)" style="fill: #bf91f3;">
+        <path fill-rule="evenodd" d="${STATS_GITHUB_MARK_PATH}"></path>
+      </g>
+    </g>
+  </g>
+</svg>`.trim();
+      }
+
+      function buildLanguageCardSvg(snapshot) {
+        const languages = snapshot.languages.slice(0, 5);
+        const displayLanguages = languages.length
+          ? languages
+          : [{ name: "Unavailable", count: 1, color: "#3b4f67" }];
+        const displayTotal = displayLanguages.reduce((sum, language) => sum + Math.max(language.count, 0), 0) || 1;
+        let currentAngle = -90;
+
+        const legendMarkup = displayLanguages
+          .map((language, index) => {
+            const offset = index * 25.2;
+            const labelY = 30 + index * 25.2;
+            return `<rect y="${18 + offset}" width="14" height="14" fill="${escapeSvgText(language.color)}" stroke="#1a1b27" style="stroke-width: 1px;"></rect><text x="16.8" y="${labelY}" style="fill: #38bdae; font-size: 14px;">${escapeSvgText(language.name)}</text>`;
+          })
+          .join("");
+
+        const arcMarkup = displayLanguages
+          .map((language, index) => {
+            const share =
+              index === displayLanguages.length - 1
+                ? Math.max(0, (270 - currentAngle) / 360)
+                : Math.max(language.count / displayTotal, 0);
+            const safeShare = displayLanguages.length === 1 ? 0.999999 : share;
+            const startAngle = currentAngle;
+            const endAngle = startAngle + safeShare * 360;
+            currentAngle = endAngle;
+            return `<g class="arc"><path d="${describeDonutSegment(startAngle, endAngle, 60, 35)}" style="fill: ${escapeSvgText(language.color)}; stroke-width: 2px;" stroke="#1a1b27"></path></g>`;
+          })
+          .join("");
+
+        return `
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="200" viewBox="0 0 340 200" role="img" aria-label="GitHub languages overview" style="font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', sans-serif;">
+  <rect x="1" y="1" rx="5" ry="5" height="99%" width="99.41176470588235%" stroke="#1a1b27" stroke-width="1" fill="#1a1b27" stroke-opacity="1"></rect>
+  <text x="30" y="40" style="font-size: 22px; fill: #70a5fd;">Top Languages by Repo</text>
+  <g transform="translate(0,40)">
+    <g transform="translate(40,0)">
+      ${legendMarkup}
+    </g>
+    <g transform="translate(230,80)">
+      ${arcMarkup}
+    </g>
+  </g>
+</svg>`.trim();
+      }
+
+      function buildCommitRunSvg(snapshot) {
+        const totalCommits = formatStatNumber(snapshot.commits.total);
+        const totalRange = snapshot.commits.since
+          ? `${formatLongDate(snapshot.commits.since)} - Present`
+          : "All indexed commits";
+        const currentRange = formatDateRange(snapshot.commits.current.start, snapshot.commits.current.end);
+        const longestRange = formatDateRange(snapshot.commits.longest.start, snapshot.commits.longest.end);
+        const streakRingPath = describeOpenCircleArc(247.5, 71, 40, -69, 249);
+
+        return `
+<svg xmlns="http://www.w3.org/2000/svg" style="isolation: isolate; font-family: 'Segoe UI', Ubuntu, 'Helvetica Neue', sans-serif;" viewBox="0 0 495 195" width="495px" height="195px" direction="ltr" role="img" aria-label="GitHub streak overview">
+  <g>
+    <g style="isolation: isolate">
+      <rect stroke="#000000" stroke-opacity="0" fill="#1a1b27" rx="4.5" x="0.5" y="0.5" width="494" height="194"></rect>
+    </g>
+    <g style="isolation: isolate">
+      <line x1="165" y1="28" x2="165" y2="170" vector-effect="non-scaling-stroke" stroke-width="1" stroke="#E4E2E2" stroke-linejoin="miter" stroke-linecap="square" stroke-miterlimit="3"></line>
+      <line x1="330" y1="28" x2="330" y2="170" vector-effect="non-scaling-stroke" stroke-width="1" stroke="#E4E2E2" stroke-linejoin="miter" stroke-linecap="square" stroke-miterlimit="3"></line>
+    </g>
+    <g style="isolation: isolate">
+      <g transform="translate(82.5, 48)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#70A5FD" stroke="none" font-weight="700" font-size="28px" font-style="normal">${escapeSvgText(totalCommits)}</text>
+      </g>
+      <g transform="translate(82.5, 84)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#70A5FD" stroke="none" font-weight="400" font-size="14px" font-style="normal">Total Contributions</text>
+      </g>
+      <g transform="translate(82.5, 114)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#38BDAE" stroke="none" font-weight="400" font-size="12px" font-style="normal">${escapeSvgText(totalRange)}</text>
+      </g>
+    </g>
+    <g style="isolation: isolate">
+      <g transform="translate(247.5, 108)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#BF91F3" stroke="none" font-weight="700" font-size="14px" font-style="normal">Current Streak</text>
+      </g>
+      <g transform="translate(247.5, 145)">
+        <text x="0" y="21" stroke-width="0" text-anchor="middle" fill="#38BDAE" stroke="none" font-weight="400" font-size="12px" font-style="normal">${escapeSvgText(currentRange)}</text>
+      </g>
+      <path d="${streakRingPath}" fill="none" stroke="#70A5FD" stroke-width="5" stroke-linecap="round"></path>
+      <g transform="translate(247.5, 19.5)" stroke-opacity="0">
+        <path d="M -12 -0.5 L 15 -0.5 L 15 23.5 L -12 23.5 L -12 -0.5 Z" fill="none"></path>
+        <path d="${STREAK_FIRE_PATH}" fill="#70A5FD" stroke-opacity="0"></path>
+      </g>
+      <g transform="translate(247.5, 48)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#BF91F3" stroke="none" font-weight="700" font-size="28px" font-style="normal">${escapeSvgText(snapshot.commits.current.length)}</text>
+      </g>
+    </g>
+    <g style="isolation: isolate">
+      <g transform="translate(412.5, 48)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#70A5FD" stroke="none" font-weight="700" font-size="28px" font-style="normal">${escapeSvgText(snapshot.commits.longest.length)}</text>
+      </g>
+      <g transform="translate(412.5, 84)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#70A5FD" stroke="none" font-weight="400" font-size="14px" font-style="normal">Longest Streak</text>
+      </g>
+      <g transform="translate(412.5, 114)">
+        <text x="0" y="32" stroke-width="0" text-anchor="middle" fill="#38BDAE" stroke="none" font-weight="400" font-size="12px" font-style="normal">${escapeSvgText(longestRange)}</text>
+      </g>
+    </g>
+  </g>
+</svg>`.trim();
+      }
+
+      function renderStatsFallback() {
         statsContent.replaceChildren();
-        if (!GITHUB_STATS_WIDGETS.length) {
-          statsContent.appendChild(
-            createNode("p", "empty-state", "No stat cards are configured for the GitHub Stats section.")
+        const frame = createNode("article", "stat-card stat-card-wide");
+        frame.appendChild(
+          createNode(
+            "p",
+            "empty-state",
+            "The stats cabinet is waiting for GitHub to respond. Featured projects and stack are still available."
+          )
+        );
+        statsContent.appendChild(frame);
+      }
+
+      async function renderStats() {
+        statsContent.replaceChildren();
+
+        try {
+          const snapshot = await loadGitHubStatsSnapshot();
+          statsContent.append(
+            createStatsSvgCard(buildStatsOverviewSvg(snapshot), false),
+            createStatsSvgCard(buildLanguageCardSvg(snapshot), false),
+            createStatsSvgCard(buildCommitRunSvg(snapshot), true)
           );
-          return;
+        } catch (error) {
+          console.warn("GitHub stats snapshot failed to load.", error);
+          renderStatsFallback();
         }
-
-        for (const widget of GITHUB_STATS_WIDGETS) {
-          const frame = createNode("div", "stat-card");
-          if (widget.wide) {
-            frame.classList.add("stat-card-wide");
-          }
-
-          const media = document.createElement("img");
-          media.src = withWidgetVersion(widget.src);
-          media.alt = widget.alt;
-          media.loading = "eager";
-          media.decoding = "async";
-          media.referrerPolicy = "no-referrer";
-          frame.appendChild(media);
-          statsContent.appendChild(frame);
-        }
-
-        warmWidgetCache(GITHUB_STATS_WIDGETS.map((widget) => withWidgetVersion(widget.src)));
       }
 
       function updateStatus(state, heading, detail, isError) {
@@ -1039,7 +1617,7 @@
           heroDescription.textContent = workshopTagline;
           renderProjects(featuredProjects);
           renderTechStack(techStack);
-          renderStats();
+          await renderStats();
 
           contentShell.hidden = false;
           statusPanel.hidden = true;

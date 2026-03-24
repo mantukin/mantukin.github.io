@@ -982,10 +982,204 @@
       }
 
       .stat-card picture,
-      .stat-card img {
+      .stat-card img,
+      .stat-card svg {
         display: block;
         width: 100%;
         height: auto;
+      }
+
+      .stats-widget-shell {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .stats-widget-head {
+        display: grid;
+        gap: 6px;
+      }
+
+      .stats-widget-title {
+        margin: 0;
+        color: #70a5fd;
+        font-size: 0.82rem;
+        letter-spacing: 0.06em;
+      }
+
+      .stats-widget-copy {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.71rem;
+        line-height: 1.65;
+      }
+
+      .stats-overview-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .stats-overview-metrics {
+        display: grid;
+        gap: 10px;
+      }
+
+      .stats-metric-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(89, 240, 255, 0.12);
+      }
+
+      .stats-metric-row:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+      }
+
+      .stats-metric-label {
+        color: #38bdae;
+        font-size: 0.77rem;
+        line-height: 1.45;
+      }
+
+      .stats-metric-value {
+        color: #d6e0e7;
+        font-size: 0.84rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .stats-emblem {
+        width: 92px;
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 6px solid #bf91f3;
+        background: radial-gradient(circle at 30% 30%, rgba(191, 145, 243, 0.2), rgba(26, 27, 39, 0.92));
+        color: #bf91f3;
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
+
+      .stats-language-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 126px;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .stats-language-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+
+      .stats-language-item {
+        display: grid;
+        grid-template-columns: 12px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .stats-language-swatch {
+        width: 12px;
+        height: 12px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.26);
+      }
+
+      .stats-language-name {
+        min-width: 0;
+        color: #d6e0e7;
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+
+      .stats-language-count {
+        color: #59f0ff;
+        font-size: 0.72rem;
+        white-space: nowrap;
+      }
+
+      .stats-language-chart {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stats-language-donut {
+        width: 120px;
+        height: 120px;
+        display: block;
+      }
+
+      .stats-language-meta {
+        display: grid;
+        gap: 4px;
+        text-align: center;
+      }
+
+      .stats-language-top {
+        color: #d6e0e7;
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+      }
+
+      .stats-language-note {
+        color: var(--text-muted);
+        font-size: 0.7rem;
+        line-height: 1.55;
+      }
+
+      .stats-commit-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+      }
+
+      .stats-commit-cell {
+        padding: 18px 12px 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: center;
+        border-right: 1px solid rgba(214, 224, 231, 0.34);
+      }
+
+      .stats-commit-cell:last-child {
+        border-right: 0;
+      }
+
+      .stats-commit-value {
+        color: #70a5fd;
+        font-size: clamp(1rem, 3vw, 1.72rem);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        line-height: 1.15;
+      }
+
+      .stats-commit-label {
+        color: #bf91f3;
+        font-size: 0.76rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .stats-commit-note {
+        margin: 0;
+        color: #59f0ff;
+        font-size: 0.72rem;
+        line-height: 1.6;
       }
 
       .empty-state {
@@ -1058,6 +1252,27 @@
         .stack-wall,
         .stats-grid {
           grid-template-columns: 1fr;
+        }
+
+        .stats-overview-layout,
+        .stats-language-layout,
+        .stats-commit-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-emblem {
+          justify-self: center;
+        }
+
+        .stats-commit-cell {
+          padding: 16px 0;
+          border-right: 0;
+          border-bottom: 1px solid rgba(214, 224, 231, 0.24);
+        }
+
+        .stats-commit-cell:last-child {
+          padding-bottom: 0;
+          border-bottom: 0;
         }
       }
 
