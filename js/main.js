@@ -1,12 +1,12 @@
       const README_URL = "https://raw.githubusercontent.com/mantukin/mantukin/main/README.md";
       const REPO_RAW_ROOT = "https://raw.githubusercontent.com/mantukin/mantukin/main/";
       const REPO_BLOB_ROOT = "https://github.com/mantukin/mantukin/blob/main/";
+      const STATS_SNAPSHOT_URL = new URL("repo_icons/github-stats/snapshot.json", REPO_RAW_ROOT).href;
       const GITHUB_USER = "mantukin";
       const GITHUB_PROFILE_URL = "https://github.com/" + GITHUB_USER;
       const GITHUB_USER_API_URL = "https://api.github.com/users/" + GITHUB_USER;
       const GITHUB_AVATAR_FALLBACK_URL = GITHUB_PROFILE_URL + ".png?size=160";
       const GITHUB_STATS_CACHE_KEY = "mantukin.github.io.stats-snapshot.v1";
-      const GITHUB_STATS_CACHE_TTL_MS = 1000 * 60 * 30;
       const TECH_STACK_BADGE_ROOT = "assets/tech-stack-badges/";
       const TECH_STACK_BADGE_MAP = Object.freeze({
         rust: { path: "rust.svg", label: "Rust" },
@@ -20,20 +20,7 @@
         css: { path: "css3.svg", label: "CSS3" },
         blender: { path: "blender.svg", label: "Blender" },
       });
-      const LANGUAGE_COLOR_MAP = Object.freeze({
-        python: "#3572a5",
-        javascript: "#f1e05a",
-        typescript: "#3178c6",
-        rust: "#dea584",
-        html: "#e34f26",
-        html5: "#e34f26",
-        css: "#1572b6",
-        css3: "#1572b6",
-        blender: "#e87d0d",
-        shell: "#89e051",
-      });
       let githubProfileData = null;
-      let githubOwnedReposPromise = null;
       let githubStatsSnapshotPromise = null;
       const STATS_CARD_ICON_PATHS = Object.freeze([
         {
@@ -385,8 +372,7 @@
         }
       }
 
-      function readStaticStatsSnapshot() {
-        const payload = window.__STATIC_GITHUB_STATS__;
+      function parseStatsSnapshotPayload(payload) {
         if (!payload || typeof payload !== "object") {
           return null;
         }
@@ -411,100 +397,6 @@
         } catch {
           // Ignore storage failures and keep the snapshot in memory only.
         }
-      }
-
-      async function fetchGitHubJson(url, extraHeaders) {
-        const response = await fetch(url, {
-          cache: "no-store",
-          headers: {
-            Accept: "application/vnd.github+json",
-            ...(extraHeaders || {}),
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`GitHub returned ${response.status} for ${url}`);
-        }
-
-        return response.json();
-      }
-
-      async function loadGitHubProfileData() {
-        if (githubProfileData) {
-          return githubProfileData;
-        }
-
-        githubProfileData = await fetchGitHubJson(GITHUB_USER_API_URL);
-        return githubProfileData;
-      }
-
-      async function loadGitHubOwnedRepos() {
-        if (githubOwnedReposPromise) {
-          return githubOwnedReposPromise;
-        }
-
-        githubOwnedReposPromise = (async () => {
-          const repos = [];
-
-          for (let page = 1; page <= 5; page += 1) {
-            const batch = await fetchGitHubJson(
-              `${GITHUB_USER_API_URL}/repos?per_page=100&type=owner&sort=pushed&page=${page}`
-            );
-
-            repos.push(...batch.filter((repo) => !repo.fork));
-
-            if (batch.length < 100) {
-              break;
-            }
-          }
-
-          return repos;
-        })().catch((error) => {
-          githubOwnedReposPromise = null;
-          throw error;
-        });
-
-        return githubOwnedReposPromise;
-      }
-
-      async function loadIssueSearchCount(query) {
-        const result = await fetchGitHubJson(
-          `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=1`
-        );
-        return result.total_count || 0;
-      }
-
-      async function loadCommitSearch(query) {
-        const items = [];
-        let totalCount = 0;
-
-        for (let page = 1; page <= 10; page += 1) {
-          const result = await fetchGitHubJson(
-            `https://api.github.com/search/commits?q=${encodeURIComponent(query)}&per_page=100&page=${page}&sort=author-date&order=desc`,
-            {
-              Accept: "application/vnd.github.cloak-preview+json",
-            }
-          );
-
-          if (page === 1) {
-            totalCount = result.total_count || 0;
-          }
-
-          items.push(...(result.items || []));
-
-          if (!result.items || result.items.length < 100 || items.length >= Math.min(totalCount, 1000)) {
-            break;
-          }
-        }
-
-        return {
-          totalCount,
-          items,
-        };
-      }
-
-      function getLanguageColor(name) {
-        return LANGUAGE_COLOR_MAP[normalizeToken(name)] || "#59f0ff";
       }
 
       function parseDateKey(dateKey) {
@@ -549,169 +441,37 @@
         return `${formatShortDate(start)} - ${formatShortDate(end)}`;
       }
 
-      function diffDays(left, right) {
-        const leftDate = parseDateKey(left);
-        const rightDate = parseDateKey(right);
-        if (!leftDate || !rightDate) {
-          return Infinity;
+      async function fetchStatsSnapshotPayload() {
+        const requestUrl = new URL(STATS_SNAPSHOT_URL);
+        requestUrl.searchParams.set("ts", String(Date.now()));
+
+        const response = await fetch(requestUrl.href, {
+          cache: "no-store",
+          headers: {
+            Accept: "application/json, text/plain, */*",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Stats snapshot request failed with status " + response.status);
         }
 
-        return Math.round((rightDate.getTime() - leftDate.getTime()) / 86400000);
-      }
-
-      function buildLanguageBreakdown(repos) {
-        const counts = new Map();
-
-        for (const repo of repos) {
-          const language = cleanDisplayText(repo.language || "");
-          if (!language) {
-            continue;
-          }
-
-          counts.set(language, (counts.get(language) || 0) + 1);
-        }
-
-        const total = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
-
-        return Array.from(counts.entries())
-          .map(([name, count]) => ({
-            name,
-            count,
-            share: total ? count / total : 0,
-            color: getLanguageColor(name),
-          }))
-          .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name))
-          .slice(0, 5);
-      }
-
-      function analyzeCommitStreaks(items) {
-        const commitsByDay = new Map();
-        const repositories = new Set();
-
-        for (const item of items) {
-          const day = (item.commit?.author?.date || item.commit?.committer?.date || "").slice(0, 10);
-          if (!day) {
-            continue;
-          }
-
-          commitsByDay.set(day, (commitsByDay.get(day) || 0) + 1);
-
-          if (item.repository?.full_name) {
-            repositories.add(item.repository.full_name);
-          }
-        }
-
-        const days = Array.from(commitsByDay.keys()).sort((left, right) => left.localeCompare(right));
-        if (!days.length) {
-          return {
-            total: items.length,
-            contributedTo: repositories.size,
-            current: { length: 0, start: "", end: "" },
-            longest: { length: 0, start: "", end: "" },
-          };
-        }
-
-        let currentRunStart = days[0];
-        let currentRunLength = 1;
-        let previousDay = days[0];
-        let longest = { length: 1, start: days[0], end: days[0] };
-
-        for (let index = 1; index < days.length; index += 1) {
-          const day = days[index];
-          if (diffDays(previousDay, day) === 1) {
-            currentRunLength += 1;
-          } else {
-            if (currentRunLength > longest.length) {
-              longest = {
-                length: currentRunLength,
-                start: currentRunStart,
-                end: previousDay,
-              };
-            }
-
-            currentRunStart = day;
-            currentRunLength = 1;
-          }
-
-          previousDay = day;
-        }
-
-        if (currentRunLength > longest.length) {
-          longest = {
-            length: currentRunLength,
-            start: currentRunStart,
-            end: previousDay,
-          };
-        }
-
-        const todayKey = new Date().toISOString().slice(0, 10);
-        const distanceFromToday = diffDays(previousDay, todayKey);
-        const current =
-          distanceFromToday <= 1
-            ? {
-                length: currentRunLength,
-                start: currentRunStart,
-                end: previousDay,
-              }
-            : { length: 0, start: "", end: "" };
-
-        return {
-          total: items.length,
-          contributedTo: repositories.size,
-          current,
-          longest,
-        };
+        return response.json();
       }
 
       async function loadGitHubStatsSnapshot() {
-        const staticSnapshot = readStaticStatsSnapshot();
-        if (staticSnapshot) {
-          writeCachedStatsSnapshot(staticSnapshot);
-          return staticSnapshot;
-        }
-
         const cached = readCachedStatsSnapshot();
-        if (cached && Date.now() - cached.timestamp < GITHUB_STATS_CACHE_TTL_MS) {
-          return cached.data;
-        }
 
         if (githubStatsSnapshotPromise) {
           return githubStatsSnapshotPromise;
         }
 
-        const currentYear = new Date().getFullYear();
-        const yearCommitQuery = `author:${GITHUB_USER} author-date:${currentYear}-01-01..${currentYear}-12-31`;
-        const allCommitQuery = `author:${GITHUB_USER}`;
-
-        githubStatsSnapshotPromise = Promise.all([
-          loadGitHubProfileData(),
-          loadGitHubOwnedRepos(),
-          loadIssueSearchCount(`author:${GITHUB_USER} type:pr`),
-          loadIssueSearchCount(`author:${GITHUB_USER} type:issue`),
-          loadCommitSearch(yearCommitQuery),
-          loadCommitSearch(allCommitQuery),
-        ])
-          .then(([profile, repos, totalPrs, totalIssues, yearCommitSearch, allCommitSearch]) => {
-            const totalStars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0);
-            const streaks = analyzeCommitStreaks(allCommitSearch.items);
-            const snapshot = {
-              year: currentYear,
-              stats: {
-                totalStars,
-                yearCommits: yearCommitSearch.totalCount || 0,
-                totalPrs,
-                totalIssues,
-                contributedTo: Math.max(repos.length, streaks.contributedTo),
-              },
-              languages: buildLanguageBreakdown(repos),
-              commits: {
-                total: allCommitSearch.totalCount || streaks.total,
-                current: streaks.current,
-                longest: streaks.longest,
-                since: profile.created_at || "",
-              },
-            };
-
+        githubStatsSnapshotPromise = fetchStatsSnapshotPayload()
+          .then((payload) => {
+            const snapshot = parseStatsSnapshotPayload(payload);
+            if (!snapshot) {
+              throw new Error("Stats snapshot payload is missing required fields.");
+            }
             writeCachedStatsSnapshot(snapshot);
             return snapshot;
           })
