@@ -16,11 +16,17 @@
         let board = [];
         let lowPowerMode = false;
         let frameInterval = 0;
-        let gridOpacity = 0.5;
+        let gridOpacity = 0.7;
+        let blockOpacity = 0.15;
+        let canvasOpacity = 0.4;
         let gridOpacityScale = 1;
+        let canvasOpacityScale = 1;
         let heroVisible = true;
         let needsRedraw = false;
         let scrollPauseUntil = 0;
+        let resizeFrame = 0;
+        let started = false;
+        let readyObserver = null;
         const scrollPauseMs = 160;
         const pausedFrameInterval = 1000 / 8;
 
@@ -54,16 +60,38 @@
           blockSize = lowPowerMode ? 32 : 24;
           frameInterval = lowPowerMode ? 1000 / 24 : 0;
           gridOpacityScale = lowPowerMode ? 0.56 : 1;
+          canvasOpacityScale = lowPowerMode ? (0.24 / 0.35) : 1;
           dropInterval = lowPowerMode ? 120 : 80;
-          canvas.style.opacity = lowPowerMode ? '0.24' : '0.35';
+          canvas.style.opacity = String(
+            Math.max(0, Math.min(1, canvasOpacity * canvasOpacityScale))
+          );
         }
 
-        function resize() {
+        function syncCanvasSize(force = false) {
+          const previousBlockSize = blockSize;
           applyPerformanceProfile();
 
           const rect = heroShell.getBoundingClientRect();
-          canvas.width = Math.max(1, Math.floor(rect.width));
-          canvas.height = Math.max(1, Math.floor(rect.height));
+          const nextWidth = Math.max(
+            1,
+            Math.round(rect.width || heroShell.clientWidth || canvas.clientWidth || 0)
+          );
+          const nextHeight = Math.max(
+            1,
+            Math.round(rect.height || heroShell.clientHeight || canvas.clientHeight || 0)
+          );
+          const sizeChanged =
+            force ||
+            canvas.width !== nextWidth ||
+            canvas.height !== nextHeight ||
+            previousBlockSize !== blockSize;
+
+          if (!sizeChanged) {
+            return false;
+          }
+
+          canvas.width = nextWidth;
+          canvas.height = nextHeight;
           cols = Math.ceil(canvas.width / blockSize);
           rows = Math.ceil(canvas.height / blockSize);
           yOffset = canvas.height - (rows * blockSize);
@@ -76,37 +104,101 @@
             }
           }
           board = newBoard;
+
+          if (activePiece) {
+            const maxX = Math.max(0, cols - activePiece.matrix[0].length);
+            activePiece.x = Math.max(0, Math.min(maxX, activePiece.x));
+            activePiece.targetX = Math.max(0, Math.min(maxX, activePiece.targetX));
+            activePiece.y = Math.max(-activePiece.matrix.length + 1, Math.min(rows - 1, activePiece.y));
+          }
+
           needsRedraw = true;
+          return true;
         }
 
-        window.addEventListener('resize', resize);
-        window.addEventListener('scroll', markScrollActivity, { passive: true });
-        window.addEventListener('touchmove', markScrollActivity, { passive: true });
-        document.addEventListener('visibilitychange', () => {
+        function scheduleResize(force = false) {
+          if (resizeFrame) {
+            cancelAnimationFrame(resizeFrame);
+          }
+
+          resizeFrame = requestAnimationFrame(() => {
+            resizeFrame = 0;
+            const resized = syncCanvasSize(force);
+            if (!resized) {
+              return;
+            }
+
+            if (started) {
+              draw();
+            }
+          });
+        }
+
+        function resetFrameClock() {
           lastTime = 0;
           lastRenderTime = 0;
           scrollPauseUntil = 0;
-        });
-
-        if (typeof performanceQuery.addEventListener === 'function') {
-          performanceQuery.addEventListener('change', resize);
-        } else if (typeof performanceQuery.addListener === 'function') {
-          performanceQuery.addListener(resize);
         }
 
-        if ('IntersectionObserver' in window) {
-          const observer = new IntersectionObserver(
-            (entries) => {
-              heroVisible = entries[0]?.isIntersecting ?? true;
-              if (heroVisible) {
-                lastTime = 0;
-                lastRenderTime = 0;
-                scrollPauseUntil = 0;
-              }
-            },
-            { threshold: 0.08 }
-          );
-          observer.observe(heroShell);
+        function attachRuntimeObservers() {
+          window.addEventListener('resize', () => scheduleResize());
+          window.addEventListener('load', () => scheduleResize(true), { once: true });
+          window.addEventListener('pageshow', () => scheduleResize(true));
+          window.addEventListener('app-shell-ready', () => scheduleResize(true));
+          window.addEventListener('profile-content-ready', () => scheduleResize(true));
+          window.addEventListener('scroll', markScrollActivity, { passive: true });
+          window.addEventListener('touchmove', markScrollActivity, { passive: true });
+          document.addEventListener('visibilitychange', resetFrameClock);
+
+          if (document.fonts && typeof document.fonts.ready?.then === 'function') {
+            document.fonts.ready.finally(() => {
+              scheduleResize(true);
+            });
+          }
+
+          if ('ResizeObserver' in window) {
+            const resizeObserver = new ResizeObserver(() => {
+              scheduleResize();
+            });
+            resizeObserver.observe(heroShell);
+          }
+
+          if (typeof performanceQuery.addEventListener === 'function') {
+            performanceQuery.addEventListener('change', () => scheduleResize(true));
+          } else if (typeof performanceQuery.addListener === 'function') {
+            performanceQuery.addListener(() => scheduleResize(true));
+          }
+
+          if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                heroVisible = entries[0]?.isIntersecting ?? true;
+                if (heroVisible) {
+                  resetFrameClock();
+                  scheduleResize();
+                }
+              },
+              { threshold: 0.08 }
+            );
+            observer.observe(heroShell);
+          }
+        }
+
+        function start() {
+          if (started) {
+            return;
+          }
+
+          started = true;
+          if (readyObserver) {
+            readyObserver.disconnect();
+            readyObserver = null;
+          }
+          attachRuntimeObservers();
+          syncCanvasSize(true);
+          draw();
+          requestAnimationFrame(() => scheduleResize(true));
+          update();
         }
 
         function markScrollActivity() {
@@ -376,7 +468,7 @@
           ctx.fillRect(px, py, blockSize, blockSize);
 
           ctx.fillStyle = color;
-          ctx.globalAlpha = 0.15;
+          ctx.globalAlpha = Math.max(0, Math.min(1, blockOpacity));
           ctx.fillRect(px, py, blockSize, blockSize);
 
           ctx.globalAlpha = 1.0;
@@ -460,7 +552,7 @@
             return;
           }
 
-          const deltaTime = time - lastTime;
+          const deltaTime = lastTime ? Math.min(time - lastTime, dropInterval) : 0;
           lastTime = time;
           lastRenderTime = time;
 
@@ -486,7 +578,38 @@
           requestAnimationFrame(update);
         }
 
-        resize();
-        update();
+        function startWhenReady() {
+          const body = document.body;
+          if (!body) {
+            document.addEventListener('DOMContentLoaded', startWhenReady, { once: true });
+            return;
+          }
+
+          if (body.dataset.appReady === 'true') {
+            start();
+            return;
+          }
+
+          readyObserver = new MutationObserver(() => {
+            if (body.dataset.appReady === 'true') {
+              readyObserver.disconnect();
+              readyObserver = null;
+              start();
+            }
+          });
+
+          readyObserver.observe(body, {
+            attributes: true,
+            attributeFilter: ['data-app-ready']
+          });
+
+          window.addEventListener('load', () => {
+            if (!started) {
+              start();
+            }
+          }, { once: true });
+        }
+
+        startWhenReady();
       })();
     
