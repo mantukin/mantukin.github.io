@@ -86,6 +86,134 @@
         return path;
       }
 
+      function initHeroLogoReplayAnimations() {
+        const INITIAL_REVEAL_DELAY_MS = 520;
+        const starters = [];
+
+        function setupReplayAnimation(zoneId, elementSelector, durationMs) {
+          const zone = document.getElementById(zoneId);
+          if (!zone) {
+            return;
+          }
+
+          const fadeOutDuration = 400;
+          let isAnimating = true;
+          const startInitialCycle = () => {
+            isAnimating = true;
+            window.setTimeout(() => {
+              isAnimating = false;
+            }, durationMs);
+          };
+
+          starters.push(startInitialCycle);
+
+          zone.addEventListener("mouseenter", () => {
+            if (isAnimating) {
+              return;
+            }
+
+            isAnimating = true;
+
+            const elements = zone.querySelectorAll(elementSelector);
+            elements.forEach((element) => {
+              element.classList.add("fade-out");
+            });
+
+            window.setTimeout(() => {
+              elements.forEach((element) => {
+                element.style.animation = "none";
+                element.classList.remove("fade-out");
+              });
+
+              void zone.getBoundingClientRect();
+
+              elements.forEach((element) => {
+                element.style.animation = "";
+              });
+
+              window.setTimeout(() => {
+                isAnimating = false;
+              }, durationMs);
+            }, fadeOutDuration);
+          });
+        }
+
+        setupReplayAnimation("logo-zone", ".logo-piece", 4200);
+        setupReplayAnimation("text-zone", ".workshop-letter", 3900);
+
+        let heroLogoReady = false;
+        const activateHeroLogo = () => {
+          if (heroLogoReady) {
+            return;
+          }
+
+          heroLogoReady = true;
+
+          if (document.body) {
+            document.body.setAttribute("data-hero-logo-ready", "true");
+          }
+
+          starters.forEach((start) => start());
+        };
+
+        const scheduleActivation = () => {
+          window.setTimeout(() => {
+            window.requestAnimationFrame(() => {
+              activateHeroLogo();
+            });
+          }, INITIAL_REVEAL_DELAY_MS);
+        };
+
+        if (document.body?.dataset.appReady === "true") {
+          scheduleActivation();
+          return;
+        }
+
+        window.addEventListener("app-ready", scheduleActivation, { once: true });
+      }
+
+      function initFeaturedProjectsTitleTypewriter() {
+        const title = document.getElementById("featured-projects-title");
+        if (!title) {
+          return;
+        }
+
+        const fullText = (title.textContent || "Builds with character").trim();
+        title.textContent = fullText;
+
+        let isAnimating = false;
+
+        const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+        title.addEventListener("pointerenter", async () => {
+          if (isAnimating) {
+            return;
+          }
+
+          isAnimating = true;
+
+          let currentText = fullText;
+          await sleep(120);
+
+          while (currentText.length > 0) {
+            currentText = currentText.slice(0, -1);
+            title.textContent = currentText;
+            await sleep(24);
+          }
+
+          await sleep(180);
+
+          for (const char of fullText) {
+            currentText += char;
+            title.textContent = currentText;
+            await sleep(52);
+          }
+
+          await sleep(220);
+          isAnimating = false;
+        });
+      }
+
       function applyProfileAvatar(source) {
         if (!heroAvatar || !heroAvatarFallback) {
           return;
@@ -540,10 +668,10 @@
         const innerStrength = 0.12 + stats.saturation * 0.16;
 
         return {
-          top: mixRgb([17, 40, 52], mutedRgb, tintStrength),
-          bottom: mixRgb([9, 21, 29], mutedRgb, shadowStrength),
-          border: mixRgb([36, 74, 91], mutedRgb, borderStrength),
-          inner: mixRgb([89, 240, 255], mutedRgb, innerStrength),
+          top: mixRgb([43, 48, 59], mutedRgb, tintStrength),
+          bottom: mixRgb([23, 26, 34], mutedRgb, shadowStrength),
+          border: mixRgb([89, 97, 118], mutedRgb, borderStrength),
+          inner: mixRgb([245, 247, 255], mutedRgb, innerStrength),
         };
       }
 
@@ -1404,6 +1532,8 @@
         }
       }
 
+      initHeroLogoReplayAnimations();
+      initFeaturedProjectsTitleTypewriter();
       loadProfileAvatar();
       loadProfileReadme();
     
