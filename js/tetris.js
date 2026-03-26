@@ -6,7 +6,7 @@
         const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
         if (!ctx) return;
         const performanceQuery = window.matchMedia(
-          '(max-width: 720px), (prefers-reduced-motion: reduce)'
+          '(max-width: 980px), (prefers-reduced-motion: reduce)'
         );
 
         let cols = 0;

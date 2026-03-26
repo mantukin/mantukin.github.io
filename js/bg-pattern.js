@@ -2,7 +2,7 @@
         const body = document.body;
         if (!body) return;
 
-        const disablePatternQuery = window.matchMedia('(max-width: 720px)');
+        const disablePatternQuery = window.matchMedia('(max-width: 980px)');
         let patternStarted = false;
         let patternPending = false;
         let startupTriggered = false;

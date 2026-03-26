@@ -1287,9 +1287,12 @@
         .secondary-grid {
           grid-template-columns: 1fr;
         }
-      }
 
-      @media (max-width: 720px) {
+        .project-icon-fallback-emoji {
+          transform: translateX(0px);
+          transform: translateY(-2px);
+        }
+
         .page-shell {
           width: min(100vw - 18px, 1240px);
           padding-top: 18px;
@@ -1333,13 +1336,6 @@
         .project-title {
           font-size: 0.72rem;
         }
-
-        .project-icon-fallback-emoji {
-          transform: translateX(0px);
-          transform: translateY(-1px);
-        }
-
-
 
         .section-title2 {
           font-size: 0.85rem;
@@ -1413,7 +1409,7 @@
 
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 980px) {
         body {
           background-size: 384px 384px, 120vw 120vh, 140vw 140vh, 130vw 130vh, 100% 100%;
           background-attachment: scroll;
