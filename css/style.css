@@ -1334,6 +1334,11 @@
           font-size: 0.72rem;
         }
 
+        .project-icon-fallback-emoji {
+          transform: translateX(0px);
+          transform: translateY(-1px);
+        }
+
 
 
         .section-title2 {
