@@ -1150,7 +1150,11 @@
               icon.decoding = "async";
               iconLink.appendChild(icon);
             } else if (emojiPart) {
-              const emojiIcon = createNode("span", "project-icon-fallback", emojiPart);
+              const emojiIcon = createNode(
+                "span",
+                "project-icon-fallback project-icon-fallback-emoji",
+                emojiPart
+              );
               emojiIcon.style.fontFamily = "system-ui, -apple-system, sans-serif";
               emojiIcon.style.fontSize = "1.6rem";
               iconLink.appendChild(emojiIcon);
