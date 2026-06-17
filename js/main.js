@@ -989,30 +989,42 @@
       }
 
       function buildProjectDescription(cell, title, techTags, extraLinks) {
-        let html = cell.innerHTML;
-        html = html.replace(/<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>/gi, " ");
-        html = html.replace(/<img[^>]*>/gi, " ");
-        html = html.replace(/<a[^>]*>[\s\S]*?<\/a>/gi, " ");
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1");
-        html = html.replace(/`([^`]+)`/g, " ");
-        html = html.replace(/\*\*([^*]+)\*\*/g, "$1");
-        html = html.replace(/^#{1,6}\s+/gm, "");
+        const clone = cell.cloneNode(true);
 
-        const scratch = document.createElement("div");
-        scratch.innerHTML = html;
-        let description = cleanDisplayText(scratch.textContent || "");
-
-        if (title) {
-          description = description.replace(new RegExp(escapeRegExp(title), "ig"), " ");
+        // Remove headings (h1-h6) which contain the project title
+        for (const h of clone.querySelectorAll("h1, h2, h3, h4, h5, h6")) {
+          h.remove();
         }
 
-        for (const tag of techTags) {
-          description = description.replace(new RegExp(escapeRegExp(tag), "ig"), " ");
+        // Remove images (icons, badges)
+        for (const img of clone.querySelectorAll("img")) {
+          img.remove();
         }
 
-        for (const link of extraLinks) {
-          description = description.replace(new RegExp(escapeRegExp(link.label), "ig"), " ");
+        // Remove all <a> tags (main repository link, extra links, etc.)
+        for (const a of clone.querySelectorAll("a")) {
+          a.remove();
         }
+
+        // Remove <code> tags that represent tech tags
+        for (const code of clone.querySelectorAll("code")) {
+          const val = cleanDisplayText(code.textContent);
+          if (techTags.some(tag => tag.toLowerCase() === val.toLowerCase())) {
+            code.remove();
+          }
+        }
+
+        // Get the text content of the cleaned DOM
+        let description = clone.textContent || "";
+
+        // Clean up markdown formatting character residues (if any)
+        description = description
+          .replace(/\u00a0/g, " ")
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+          .replace(/`([^`]+)`/g, "$1")
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/__([^_]+)__/g, "$1")
+          .replace(/^#{1,6}\s+/gm, "");
 
         return description
           .replace(/\s+/g, " ")
