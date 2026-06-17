@@ -1126,6 +1126,14 @@
           );
 
           const grid = createNode("div", "project-grid");
+          const count = category.items.length;
+          if (count === 4 || count === 2) {
+            grid.classList.add("cols-2");
+          } else if (count >= 3) {
+            grid.classList.add("cols-3");
+          } else {
+            grid.classList.add("cols-1");
+          }
           for (const item of category.items) {
             const card = createNode("article", "project-card");
             

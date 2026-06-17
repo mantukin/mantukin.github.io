@@ -824,6 +824,18 @@
         gap: 16px;
       }
 
+      @media (min-width: 981px) {
+        .project-grid.cols-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .project-grid.cols-2 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .project-grid.cols-1 {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .project-card {
         --project-card-top-rgb: 43, 48, 59;
         --project-card-bottom-rgb: 23, 26, 34;
