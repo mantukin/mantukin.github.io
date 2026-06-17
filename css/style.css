@@ -507,22 +507,6 @@
         gap: 10px;
       }
 
-      .console-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 10px 12px;
-        color: var(--text-soft);
-        background: rgba(32, 36, 45, 0.44);
-        border: 1px solid var(--surface-border-soft);
-        font-size: 0.84rem;
-      }
-
-      .console-row span:last-child {
-        color: var(--accent-cool);
-        text-align: right;
-      }
-
       .console-lights {
         display: flex;
         align-self: center;
