@@ -581,17 +581,7 @@
         transform: scale(1.06);
       }
 
-      .telegram-icon {
-        width: 36px;
-        height: 36px;
-        color: var(--accent-cool);
-        transition: transform 0.2s, color 0.2s;
-      }
 
-      .console-profile-row:hover .telegram-icon {
-        transform: scale(1.08) rotate(-4deg);
-        color: var(--accent-secondary);
-      }
 
       .console-avatar-fallback {
         font-family: "Press Start 2P", monospace;
