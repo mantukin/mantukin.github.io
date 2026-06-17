@@ -292,8 +292,7 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
-        padding-bottom: 24px;
-        padding-top: 10px;
+        padding-top: 35px;
       }
 
       .hero-launchpad-label {
@@ -385,6 +384,11 @@
           0 0 0 2px var(--border-dark),
           0 0 0 4px rgba(149, 158, 184, 0.14),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
+        transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+      }
+
+      .app-shortcut:hover {
+        background: linear-gradient(180deg, rgba(48, 54, 67, 0.78), rgba(26, 30, 39, 0.82));
       }
 
       .app-shortcut.shakalfx {
@@ -394,11 +398,27 @@
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
       }
 
+      .app-shortcut.shakalfx:hover {
+        box-shadow:
+          0 0 0 2px var(--border-dark),
+          0 0 12px rgba(255, 159, 28, 0.35),
+          0 0 0 4px rgba(255, 159, 28, 0.28),
+          8px 8px 0 0 rgba(0, 0, 0, 0.35);
+      }
+
       .app-shortcut.motif {
         box-shadow:
           0 0 0 2px var(--border-dark),
           0 0 0 4px rgba(255, 92, 138, 0.16),
           6px 6px 0 0 rgba(0, 0, 0, 0.24);
+      }
+
+      .app-shortcut.motif:hover {
+        box-shadow:
+          0 0 0 2px var(--border-dark),
+          0 0 12px rgba(255, 92, 138, 0.35),
+          0 0 0 4px rgba(255, 92, 138, 0.28),
+          8px 8px 0 0 rgba(0, 0, 0, 0.35);
       }
 
       .app-shortcut-icon-shell {
@@ -411,11 +431,18 @@
         box-shadow:
           inset 0 0 0 1px var(--surface-inner),
           0 0 0 1px rgba(9, 10, 14, 0.96);
+        transition: border-color 0.2s, box-shadow 0.2s;
       }
 
       .app-shortcut.shakalfx .app-shortcut-icon-shell {
         box-shadow:
           inset 0 0 0 1px rgba(255, 159, 28, 0.22),
+          0 0 0 1px rgba(6, 9, 13, 0.96);
+      }
+
+      .app-shortcut.shakalfx:hover .app-shortcut-icon-shell {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 159, 28, 0.55),
           0 0 0 1px rgba(6, 9, 13, 0.96);
       }
 
@@ -425,11 +452,22 @@
           0 0 0 1px rgba(6, 9, 13, 0.96);
       }
 
+      .app-shortcut.motif:hover .app-shortcut-icon-shell {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 92, 138, 0.55),
+          0 0 0 1px rgba(6, 9, 13, 0.96);
+      }
+
       .app-shortcut-icon {
         width: 100%;
         height: 100%;
         object-fit: contain;
         padding: 7px;
+        transition: transform 0.2s ease;
+      }
+
+      .app-shortcut:hover .app-shortcut-icon {
+        transform: scale(1.1);
       }
 
       .app-shortcut-copy {
